@@ -599,6 +599,8 @@ loop.shared.views = (function(_, mozL10n) {
       isLoading: React.PropTypes.bool.isRequired,
       mediaType: React.PropTypes.string.isRequired,
       posterUrl: React.PropTypes.string,
+      remoteCursorLeft: React.PropTypes.number,
+      remoteCursorTop: React.PropTypes.number,
       // Expecting "local" or "remote".
       srcMediaElement: React.PropTypes.object
     },
@@ -631,7 +633,7 @@ loop.shared.views = (function(_, mozL10n) {
         return;
       }
 
-      var videoElement = this.getDOMNode();
+      var videoElement = this.getDOMNode().querySelector("video");
 
       if (videoElement.tagName.toLowerCase() !== "video") {
         // Must be displaying the avatar view, so don't try and attach video.
@@ -675,9 +677,14 @@ loop.shared.views = (function(_, mozL10n) {
         return <div className="no-video"/>;
       }
 
-      var optionalPoster = {};
+      var optionalProps = {};
       if (this.props.posterUrl) {
-        optionalPoster.poster = this.props.posterUrl;
+        optionalProps.poster = this.props.posterUrl;
+      }
+
+      // TODO: attach a handle in case we need to send standalone cursor to the link generator
+      if (this.props.remoteCursorLeft && this.props.remoteCursorTop) {
+
       }
 
       // For now, always mute media. For local media, we should be muted anyway,
@@ -690,9 +697,16 @@ loop.shared.views = (function(_, mozL10n) {
       // We might want to consider changing this if we add UI controls relating
       // to the remote audio at some stage in the future.
       return (
-        <video {...optionalPoster}
-               className={this.props.mediaType + "-video"}
-               muted />
+        <div className="remote-video-box">
+        { this.props.remoteCursorLeft && this.props.remoteCursorTop ?
+          <RemoteCursorView
+            remoteCursorLeft={this.props.remoteCursorLeft}
+            remoteCursorTop={this.props.remoteCursorTop} /> :
+            null }
+          <video {...optionalProps}
+                 className={this.props.mediaType + "-video"}
+                 muted />
+        </div>
       );
     }
   });
@@ -712,6 +726,8 @@ loop.shared.views = (function(_, mozL10n) {
       // Passing in matchMedia, allows it to be overriden for ui-showcase's
       // benefit. We expect either the override or window.matchMedia.
       matchMedia: React.PropTypes.func.isRequired,
+      remoteCursorLeft: React.PropTypes.number,
+      remoteCursorTop: React.PropTypes.number,
       remotePosterUrl: React.PropTypes.string,
       remoteSrcMediaElement: React.PropTypes.object,
       renderRemoteVideo: React.PropTypes.bool.isRequired,
@@ -766,10 +782,13 @@ loop.shared.views = (function(_, mozL10n) {
     renderLocalVideo: function() {
       return (
         <div className="local">
-          <MediaView displayAvatar={this.props.localVideoMuted}
+          <MediaView
+            displayAvatar={this.props.localVideoMuted}
             isLoading={this.props.isLocalLoading}
             mediaType="local"
             posterUrl={this.props.localPosterUrl}
+            remoteCursorLeft={this.props.remoteCursorLeft}
+            remoteCursorTop={this.props.remoteCursorTop}
             srcMediaElement={this.props.localSrcMediaElement} />
         </div>
       );
@@ -802,20 +821,26 @@ loop.shared.views = (function(_, mozL10n) {
               {mozL10n.get("self_view_hidden_message")}
             </span>
             <div className={remoteStreamClasses}>
-              <MediaView displayAvatar={!this.props.renderRemoteVideo}
+              <MediaView
+                displayAvatar={!this.props.renderRemoteVideo}
                 isLoading={this.props.isRemoteLoading}
                 mediaType="remote"
                 posterUrl={this.props.remotePosterUrl}
+                remoteCursorLeft={this.props.remoteCursorLeft}
+                remoteCursorTop={this.props.remoteCursorTop}
                 srcMediaElement={this.props.remoteSrcMediaElement} />
               {this.state.localMediaAboslutelyPositioned ?
                 this.renderLocalVideo() : null}
               {this.props.displayScreenShare ? null : this.props.children}
             </div>
             <div className={screenShareStreamClasses}>
-              <MediaView displayAvatar={false}
+              <MediaView
+                displayAvatar={false}
                 isLoading={this.props.isScreenShareLoading}
                 mediaType="screen-share"
                 posterUrl={this.props.screenSharePosterUrl}
+                remoteCursorLeft={this.props.remoteCursorLeft}
+                remoteCursorTop={this.props.remoteCursorTop}
                 srcMediaElement={this.props.screenShareMediaElement} />
               {this.props.displayScreenShare ? this.props.children : null}
             </div>
@@ -831,6 +856,28 @@ loop.shared.views = (function(_, mozL10n) {
     }
   });
 
+  var RemoteCursorView = React.createClass({
+    mixins: [React.addons.PureRenderMixin],
+
+    propTypes: {
+      remoteCursorLeft: React.PropTypes.number,
+      remoteCursorTop: React.PropTypes.number
+    },
+
+    render: function () {
+      console.log("remoteCursorTop", this.props.remoteCursorTop);
+      console.log("remoteCursorLeft", this.props.remoteCursorLeft);
+      var cursorStyle = {
+        top: this.props.remoteCursorTop,
+        left: this.props.remoteCursorLeft
+      };
+
+      return (
+        <div className="remote-cursor" style={cursorStyle} />
+      );
+    }
+  });
+
   return {
     AvatarView: AvatarView,
     Button: Button,
@@ -842,6 +889,7 @@ loop.shared.views = (function(_, mozL10n) {
     MediaLayoutView: MediaLayoutView,
     MediaView: MediaView,
     LoadingView: LoadingView,
-    NotificationListView: NotificationListView
+    NotificationListView: NotificationListView,
+    RemoteCursorView: RemoteCursorView,
   };
 })(_, navigator.mozL10n || document.mozL10n);

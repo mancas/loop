@@ -131,6 +131,27 @@ loop.shared.actions = (function() {
     }),
 
     /**
+     * Used to send a message to the other peer.
+     */
+    SendCursorPosition: Action.define("sendCursorPosition", {
+      type: String,
+      top: Number,
+      left: Number
+      // sentTimestamp: String (optional)
+    }),
+
+    /**
+     * Notifies that a message has been received from the other peer.
+     */
+    ReceivedCursorPosition: Action.define("receivedCursorPosition", {
+      type: String,
+      top: Number,
+      left: Number,
+      receivedTimestamp: String
+      // sentTimestamp: String (optional)
+    }),
+
+    /**
      * Used by the ongoing views to notify stores about the elements
      * required for the sdk.
      */

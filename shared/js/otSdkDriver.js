@@ -10,6 +10,7 @@ loop.OTSdkDriver = (function() {
   var FAILURE_DETAILS = loop.shared.utils.FAILURE_DETAILS;
   var STREAM_PROPERTIES = loop.shared.utils.STREAM_PROPERTIES;
   var SCREEN_SHARE_STATES = loop.shared.utils.SCREEN_SHARE_STATES;
+  const CURSOR_POSITION_MESSAGE_TYPE = "cursorposition";
 
   /**
    * This is a wrapper for the OT sdk. It is used to translate the SDK events into
@@ -693,18 +694,7 @@ loop.OTSdkDriver = (function() {
         }
 
         channel.on({
-          message: function(ev) {
-            try {
-              var message = JSON.parse(ev.data);
-              /* Append the timestamp. This is the time that gets shown. */
-              message.receivedTimestamp = (new Date()).toISOString();
-
-              this.dispatcher.dispatch(
-                new sharedActions.ReceivedTextChatMessage(message));
-            } catch (ex) {
-              console.error("Failed to process incoming chat message", ex);
-            }
-          }.bind(this),
+          message: this._handleMessage.bind(this),
 
           close: function() {
             // XXX We probably want to dispatch and handle this somehow.
@@ -754,6 +744,25 @@ loop.OTSdkDriver = (function() {
       }.bind(this));
     },
 
+    _handleMessage: function(ev) {
+      try {
+        var message = JSON.parse(ev.data);
+        /* Append the timestamp. This is the time that gets shown. */
+        message.receivedTimestamp = (new Date()).toISOString();
+
+        if (message.type && message.type === CURSOR_POSITION_MESSAGE_TYPE) {
+          this.dispatcher.dispatch(
+            new sharedActions.ReceivedCursorPosition(message));
+          return;
+        }
+
+        this.dispatcher.dispatch(
+          new sharedActions.ReceivedTextChatMessage(message));
+      } catch (ex) {
+        console.error("Failed to process incoming chat message", ex);
+      }
+    },
+
     /**
      * Checks to see if all channels have been obtained, and if so it dispatches
      * a notification to the stores to inform them.
@@ -773,6 +782,24 @@ loop.OTSdkDriver = (function() {
      */
     sendTextChatMessage: function(message) {
       this._publisherChannel.send(JSON.stringify(message));
+    },
+
+    /**
+     * Sends the cursor position on the data channel.
+     *
+     * @param {String} message The message to send.
+     */
+    sendCursorPositionMessage: function(message) {
+      if (!this._publisherChannel || !this._subscriberChannel) {
+        return;
+      }
+
+      this._publisherChannel.send(JSON.stringify({
+        type: CURSOR_POSITION_MESSAGE_TYPE,
+        top: message.top,
+        left: message.left,
+        sentTimestamp: (new Date()).toISOString()
+      }));
     },
 
     /**

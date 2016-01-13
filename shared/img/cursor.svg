@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 15 20">
+  <style>
+    use:not(:target) {
+      display: none;
+    }
+    use[id$="-orange"] {
+      fill: #F7A25E;
+    }
+    use[id$="-blue"] {
+      fill: #00a9dc;
+    }
+  </style>
+  <defs>
+    <g id="cursor">
+      <path d="M3.38697632,13.4830316 L6.22,18.492 L6.689,19.321 L7.54,18.893 L9.519,17.898 L9.518,17.898 L10.456,17.426 L9.939,16.512 L7.38622856,11.999 L12.63,11.999 L10.664,10.252 L1.664,2.252 L0,0.773 L0,3 L0,2.999 L0,17.999 L1.8,15.599 L3.38697632,13.4830316 L3.38697632,13.4830316 Z" id="Shape" fill="#FFFFFF"></path>
+      <path fill-rule="evenodd" d="M3.505,11.66 L7.091,18 L9.07,17.005 L5.673,11 L10,11 L1,3 L1,15 L3.505,11.66 L3.505,11.66 Z" id="Shape"></path>
+    </g>
+  </defs>
+  <use id="cursor-orange" xlink:href="#cursor"/>
+  <use id="cursor-blue" xlink:href="#cursor"/>
+</svg>
