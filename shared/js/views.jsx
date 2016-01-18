@@ -608,8 +608,25 @@ loop.shared.views = (function(_, mozL10n) {
     getInitialState: function() {
       return {
         offsetLeft: 0,
-        offsetTop: 0
+        offsetTop: 0,
+        streamVideoHeight: 0,
+        streamVideoWidth: 0
       };
+    },
+
+    componentWillReceiveProps: function(nextProps) {
+      // We need to calculate the cursor postion based on the current video stream dimensions
+      var percentX = nextProps.remoteCursorLeft;
+      var percentY = nextProps.remoteCursorTop;
+
+      var cursorPositionX = (this.state.streamVideoWidth * percentX) / 100;
+      var cursorPositionY = (this.state.streamVideoHeight * percentY) / 100;
+console.info("cursor position X", cursorPositionX);
+console.info("cursor position Y", cursorPositionY);
+      this.setState({
+        cursorPositionX: cursorPositionX,
+        cursorPositionY: cursorPositionY
+      });
     },
 
     componentDidMount: function() {
@@ -657,7 +674,9 @@ loop.shared.views = (function(_, mozL10n) {
 
       this.setState({
         offsetLeft: (clientWidth - streamVideoWidth) / 2,
-        offsetTop: (clientHeight - streamVideoHeight) / 2
+        offsetTop: (clientHeight - streamVideoHeight) / 2,
+        streamVideoHeight: streamVideoHeight,
+        streamVideoWidth: streamVideoWidth
       });
     },
 
@@ -747,8 +766,8 @@ loop.shared.views = (function(_, mozL10n) {
           <RemoteCursorView
             offsetLeft={this.state.offsetLeft}
             offsetTop={this.state.offsetTop}
-            remoteCursorLeft={this.props.remoteCursorLeft}
-            remoteCursorTop={this.props.remoteCursorTop} /> :
+            remoteCursorLeft={this.state.cursorPositionX}
+            remoteCursorTop={this.state.cursorPositionY} /> :
             null }
           <video {...optionalProps}
                  className={this.props.mediaType + "-video"}

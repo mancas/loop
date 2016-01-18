@@ -958,13 +958,13 @@ loop.store.ActiveRoomStore = (function() {
 
     _handleSendCursorPosition: function(event) {
 console.info(event);
-      var clientWidth = window.clientWidth;
-      var clientHeight = window.clientHeight;
+      var clientWidth = window.outerWidth;
+      var clientHeight = window.outerHeight;
 
       // Send percentage instead of absolute positon
       this._sdkDriver.sendCursorPositionMessage({
-        top: (event.cursorX * 100) / clientWidth,
-        left:(event.cursorY * 100) / clientHeight
+        top: (event.cursorY * 100) / clientHeight,
+        left:(event.cursorX * 100) / clientWidth
       });
     },
 
