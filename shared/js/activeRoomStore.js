@@ -859,7 +859,11 @@ loop.store.ActiveRoomStore = (function() {
     },
 
     receivedCursorPosition: function(actionData) {
+      // TODO: Remove this
       console.info("received!", actionData);
+      var sent = new Date(actionData.sentTimestamp);
+      var received = new Date(actionData.receivedTimestamp);
+      console.info("Delay in ms", received.getTime() - sent.getTime());
       // TODO: handle cursor position if it's desktop instead of standalone
       this.setStoreState({
         remoteCursorTop: actionData.top,
