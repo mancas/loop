@@ -605,16 +605,60 @@ loop.shared.views = (function(_, mozL10n) {
       srcMediaElement: React.PropTypes.object
     },
 
+    getInitialState: function() {
+      return {
+        offsetLeft: 0,
+        offsetTop: 0
+      };
+    },
+
     componentDidMount: function() {
       if (!this.props.displayAvatar) {
         this.attachVideo(this.props.srcMediaElement);
       }
     },
 
+    componentWillUnmount: function() {
+      var videoElement = this.getDOMNode().querySelector("video");
+      videoElement.removeEventListener("timeupdate", this.handleVideoUpdate);
+    },
+
     componentDidUpdate: function() {
       if (!this.props.displayAvatar) {
         this.attachVideo(this.props.srcMediaElement);
       }
+    },
+
+    handleVideoUpdate: function(event) {
+      console.info(event);
+      var clientWidth = event.target.clientWidth;
+      var clientHeight = event.target.clientHeight;
+
+      var realVideoWidth = event.target.videoWidth;
+      var realVideoHeight = event.target.videoHeight;
+
+      var streamVideoWidth = 0;
+      var streamVideoHeight = 0;
+
+      if (realVideoHeight >= clientHeight) {
+        // Reduce video width
+        streamVideoWidth = (realVideoWidth * clientHeight) / realVideoHeight;
+        streamVideoHeight = clientHeight;
+      } else if (realVideoWidth >= clientWidth) {
+        // Reduce video with to fit the available space and calculates the video height
+        streamVideoWidth = clientWidth;
+        streamVideoHeight = (realVideoHeight * clientWidth) / realVideoWidth;
+      } else {
+        // In this case we should keep the real dimension of the video since the
+        // video fits in the screen without reducing width or height
+        streamVideoWidth = realVideoWidth;
+        streamVideoHeight = realVideoHeight;
+      }
+
+      this.setState({
+        offsetLeft: (clientWidth - streamVideoWidth) / 2,
+        offsetTop: (clientHeight - streamVideoHeight) / 2
+      });
     },
 
     /**
@@ -634,6 +678,7 @@ loop.shared.views = (function(_, mozL10n) {
       }
 
       var videoElement = this.getDOMNode().querySelector("video");
+      videoElement.addEventListener("loadeddata", this.handleVideoUpdate);
 
       if (videoElement.tagName.toLowerCase() !== "video") {
         // Must be displaying the avatar view, so don't try and attach video.
@@ -700,6 +745,8 @@ loop.shared.views = (function(_, mozL10n) {
         <div className="remote-video-box">
         { this.props.remoteCursorLeft && this.props.remoteCursorTop ?
           <RemoteCursorView
+            offsetLeft={this.state.offsetLeft}
+            offsetTop={this.state.offsetTop}
             remoteCursorLeft={this.props.remoteCursorLeft}
             remoteCursorTop={this.props.remoteCursorTop} /> :
             null }
@@ -860,6 +907,8 @@ loop.shared.views = (function(_, mozL10n) {
     mixins: [React.addons.PureRenderMixin],
 
     propTypes: {
+      offsetLeft: React.PropTypes.number,
+      offsetTop: React.PropTypes.number,
       remoteCursorLeft: React.PropTypes.number,
       remoteCursorTop: React.PropTypes.number
     },
@@ -867,9 +916,11 @@ loop.shared.views = (function(_, mozL10n) {
     render: function () {
       console.log("remoteCursorTop", this.props.remoteCursorTop);
       console.log("remoteCursorLeft", this.props.remoteCursorLeft);
+      console.log("offsetTop", this.props.offsetTop);
+      console.log("offsetLeft", this.props.offsetLeft);
       var cursorStyle = {
-        top: this.props.remoteCursorTop,
-        left: this.props.remoteCursorLeft
+        top: this.props.remoteCursorTop + this.props.offsetTop,
+        left: this.props.remoteCursorLeft + this.props.offsetLeft
       };
 
       return (

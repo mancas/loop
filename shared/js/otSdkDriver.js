@@ -793,7 +793,7 @@ loop.OTSdkDriver = (function() {
       if (!this._publisherChannel || !this._subscriberChannel) {
         return;
       }
-
+console.info(message);
       this._publisherChannel.send(JSON.stringify({
         type: CURSOR_POSITION_MESSAGE_TYPE,
         top: message.top,

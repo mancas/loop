@@ -604,5 +604,6 @@ html[dir="rtl"] .context-wrapper > .context-preview {
   top: 0;
   left: 0;
   z-index: 65534;
+  background-color: red;
   background: url('../img/cursor.svg#cursor-orange') no-repeat;
 }
