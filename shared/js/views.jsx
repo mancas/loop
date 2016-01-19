@@ -599,7 +599,6 @@ loop.shared.views = (function(_, mozL10n) {
       isLoading: React.PropTypes.bool.isRequired,
       mediaType: React.PropTypes.string.isRequired,
       posterUrl: React.PropTypes.string,
-      remoteCursor: React.PropTypes.bool,
       remoteCursorLeft: React.PropTypes.number,
       remoteCursorTop: React.PropTypes.number,
       // Expecting "local" or "remote".
@@ -616,7 +615,7 @@ loop.shared.views = (function(_, mozL10n) {
     },
 
     componentWillReceiveProps: function(nextProps) {
-      if (!this.props.remoteCursor) {
+      if (!nextProps.remoteCursorLeft || !nextProps.remoteCursorTop) {
         return;
       }
 
@@ -705,7 +704,7 @@ console.info("cursor position Y", cursorPositionY);
       }
 
       var videoElement = this.getDOMNode().querySelector("video");
-      if (this.props.remoteCursor) {
+      if (this.props.remoteCursorLeft && this.props.remoteCursorTop) {
         videoElement.addEventListener("loadeddata", this.handleVideoUpdate);
       }
 
@@ -772,7 +771,7 @@ console.info("cursor position Y", cursorPositionY);
       // to the remote audio at some stage in the future.
       return (
         <div className="remote-video-box">
-        { this.props.remoteCursor && this.props.remoteCursorLeft && this.props.remoteCursorTop ?
+        { this.props.remoteCursorLeft && this.props.remoteCursorTop ?
           <RemoteCursorView
             offsetLeft={this.state.offsetLeft}
             offsetTop={this.state.offsetTop}
@@ -863,8 +862,6 @@ console.info("cursor position Y", cursorPositionY);
             isLoading={this.props.isLocalLoading}
             mediaType="local"
             posterUrl={this.props.localPosterUrl}
-            remoteCursorLeft={this.props.remoteCursorLeft}
-            remoteCursorTop={this.props.remoteCursorTop}
             srcMediaElement={this.props.localSrcMediaElement} />
         </div>
       );
@@ -902,8 +899,6 @@ console.info("cursor position Y", cursorPositionY);
                 isLoading={this.props.isRemoteLoading}
                 mediaType="remote"
                 posterUrl={this.props.remotePosterUrl}
-                remoteCursorLeft={this.props.remoteCursorLeft}
-                remoteCursorTop={this.props.remoteCursorTop}
                 srcMediaElement={this.props.remoteSrcMediaElement} />
               {this.state.localMediaAboslutelyPositioned ?
                 this.renderLocalVideo() : null}
@@ -915,7 +910,6 @@ console.info("cursor position Y", cursorPositionY);
                 isLoading={this.props.isScreenShareLoading}
                 mediaType="screen-share"
                 posterUrl={this.props.screenSharePosterUrl}
-                remoteCursor={true}
                 remoteCursorLeft={this.props.remoteCursorLeft}
                 remoteCursorTop={this.props.remoteCursorTop}
                 srcMediaElement={this.props.screenShareMediaElement} />

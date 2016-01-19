@@ -799,6 +799,7 @@ loop.OTSdkDriver = (function() {
       }
 console.info("sendCursorMessage", message);
       message.sentTimestamp = (new Date()).toISOString();
+      message.userID = this.session.sessionId;
       this._publisherChannel.send(JSON.stringify(message));
     },
 
