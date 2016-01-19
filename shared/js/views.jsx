@@ -599,6 +599,7 @@ loop.shared.views = (function(_, mozL10n) {
       isLoading: React.PropTypes.bool.isRequired,
       mediaType: React.PropTypes.string.isRequired,
       posterUrl: React.PropTypes.string,
+      remoteCursor: React.PropTypes.bool,
       remoteCursorLeft: React.PropTypes.number,
       remoteCursorTop: React.PropTypes.number,
       // Expecting "local" or "remote".
@@ -615,6 +616,10 @@ loop.shared.views = (function(_, mozL10n) {
     },
 
     componentWillReceiveProps: function(nextProps) {
+      if (!this.props.remoteCursor) {
+        return;
+      }
+
       // We need to calculate the cursor postion based on the current video stream dimensions
       var percentX = nextProps.remoteCursorLeft;
       var percentY = nextProps.remoteCursorTop;
@@ -657,14 +662,17 @@ console.info("cursor position Y", cursorPositionY);
       var streamVideoWidth = 0;
       var streamVideoHeight = 0;
 
-      if (realVideoHeight >= clientHeight) {
+      // Both dimensions are bigger than the screen size
+      if (realVideoHeight >= clientHeight && realVideoWidth >= clientWidth) {
         // Reduce video width
-        streamVideoWidth = (realVideoWidth * clientHeight) / realVideoHeight;
-        streamVideoHeight = clientHeight;
-      } else if (realVideoWidth >= clientWidth) {
-        // Reduce video with to fit the available space and calculates the video height
         streamVideoWidth = clientWidth;
         streamVideoHeight = (realVideoHeight * clientWidth) / realVideoWidth;
+
+        // In this case we need to do extra work because the video can't be 100% width
+        if (streamVideoHeight > clientHeight) {
+          streamVideoWidth = (realVideoWidth * clientHeight) / realVideoHeight;
+          streamVideoHeight = clientHeight;
+        }
       } else {
         // In this case we should keep the real dimension of the video since the
         // video fits in the screen without reducing width or height
@@ -697,7 +705,9 @@ console.info("cursor position Y", cursorPositionY);
       }
 
       var videoElement = this.getDOMNode().querySelector("video");
-      videoElement.addEventListener("loadeddata", this.handleVideoUpdate);
+      if (this.props.remoteCursor) {
+        videoElement.addEventListener("loadeddata", this.handleVideoUpdate);
+      }
 
       if (videoElement.tagName.toLowerCase() !== "video") {
         // Must be displaying the avatar view, so don't try and attach video.
@@ -762,7 +772,7 @@ console.info("cursor position Y", cursorPositionY);
       // to the remote audio at some stage in the future.
       return (
         <div className="remote-video-box">
-        { this.props.remoteCursorLeft && this.props.remoteCursorTop ?
+        { this.props.remoteCursor && this.props.remoteCursorLeft && this.props.remoteCursorTop ?
           <RemoteCursorView
             offsetLeft={this.state.offsetLeft}
             offsetTop={this.state.offsetTop}
@@ -905,6 +915,7 @@ console.info("cursor position Y", cursorPositionY);
                 isLoading={this.props.isScreenShareLoading}
                 mediaType="screen-share"
                 posterUrl={this.props.screenSharePosterUrl}
+                remoteCursor={true}
                 remoteCursorLeft={this.props.remoteCursorLeft}
                 remoteCursorTop={this.props.remoteCursorTop}
                 srcMediaElement={this.props.screenShareMediaElement} />
