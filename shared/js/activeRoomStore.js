@@ -40,6 +40,7 @@ loop.store.ActiveRoomStore = (function() {
   var CHAT_CONTENT_TYPES = loop.shared.utils.CHAT_CONTENT_TYPES;
   var FAILURE_DETAILS = loop.shared.utils.FAILURE_DETAILS;
   var SCREEN_SHARE_STATES = loop.shared.utils.SCREEN_SHARE_STATES;
+  var CURSOR_MESSAGE_TYPES = loop.shared.utils.CURSOR_MESSAGE_TYPES;
 
   // Error numbers taken from
   // https://github.com/mozilla-services/loop-server/blob/master/loop/errno.json
@@ -961,12 +962,12 @@ loop.store.ActiveRoomStore = (function() {
     },
 
     _handleSendCursorPosition: function(event) {
-console.info(event);
       var clientWidth = window.outerWidth;
       var clientHeight = window.outerHeight;
 
       // Send percentage instead of absolute positon
-      this._sdkDriver.sendCursorPositionMessage({
+      this._sdkDriver.sendCursorMessage({
+        type: CURSOR_MESSAGE_TYPES.POSITION,
         top: (event.cursorY * 100) / clientHeight,
         left:(event.cursorX * 100) / clientWidth
       });

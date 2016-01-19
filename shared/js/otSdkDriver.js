@@ -10,7 +10,7 @@ loop.OTSdkDriver = (function() {
   var FAILURE_DETAILS = loop.shared.utils.FAILURE_DETAILS;
   var STREAM_PROPERTIES = loop.shared.utils.STREAM_PROPERTIES;
   var SCREEN_SHARE_STATES = loop.shared.utils.SCREEN_SHARE_STATES;
-  const CURSOR_POSITION_MESSAGE_TYPE = "cursorposition";
+  var CURSOR_MESSAGE_TYPES = loop.shared.utils.CURSOR_MESSAGE_TYPES;
 
   /**
    * This is a wrapper for the OT sdk. It is used to translate the SDK events into
@@ -750,9 +750,13 @@ loop.OTSdkDriver = (function() {
         /* Append the timestamp. This is the time that gets shown. */
         message.receivedTimestamp = (new Date()).toISOString();
 
-        if (message.type && message.type === CURSOR_POSITION_MESSAGE_TYPE) {
-          this.dispatcher.dispatch(
-            new sharedActions.ReceivedCursorPosition(message));
+        if (message.type) {
+          switch (message.type) {
+            case CURSOR_MESSAGE_TYPES.POSITION:
+              this.dispatcher.dispatch(
+                new sharedActions.ReceivedCursorPosition(message));
+              break;
+          }
           return;
         }
 
@@ -789,17 +793,13 @@ loop.OTSdkDriver = (function() {
      *
      * @param {String} message The message to send.
      */
-    sendCursorPositionMessage: function(message) {
+    sendCursorMessage: function(message) {
       if (!this._publisherChannel || !this._subscriberChannel) {
         return;
       }
-console.info(message);
-      this._publisherChannel.send(JSON.stringify({
-        type: CURSOR_POSITION_MESSAGE_TYPE,
-        top: message.top,
-        left: message.left,
-        sentTimestamp: (new Date()).toISOString()
-      }));
+console.info("sendCursorMessage", message);
+      message.sentTimestamp = (new Date()).toISOString();
+      this._publisherChannel.send(JSON.stringify(message));
     },
 
     /**
