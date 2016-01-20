@@ -675,7 +675,7 @@ var WindowListener = {
         this.lastCursorX = deltaX;
         this.lastCursorY = deltaY;
 
-        this.LoopAPI.broadcastPushMessage("CursorPosition",
+        this.LoopAPI.broadcastPushMessage("CursorPositionChange",
           { cursorX: deltaX, cursorY: deltaY });
       },
 

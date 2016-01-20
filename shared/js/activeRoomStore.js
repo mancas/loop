@@ -867,8 +867,10 @@ loop.store.ActiveRoomStore = (function() {
       console.info("Delay in ms", received.getTime() - sent.getTime());
       // TODO: handle cursor position if it's desktop instead of standalone
       this.setStoreState({
-        remoteCursorTop: actionData.top,
-        remoteCursorLeft: actionData.left
+        remoteCursorPosition: {
+          top: actionData.top,
+          left: actionData.left
+        }
       });
     },
 
@@ -996,7 +998,7 @@ loop.store.ActiveRoomStore = (function() {
       loop.request("AddBrowserSharingListener", this.getStoreState().windowId)
         .then(this._browserSharingListener);
       loop.subscribe("BrowserSwitch", this._browserSharingListener);
-      loop.subscribe("CursorPosition", this._sendCursorPositionListener);
+      loop.subscribe("CursorPositionChange", this._sendCursorPositionListener);
     },
 
     /**
@@ -1008,6 +1010,7 @@ loop.store.ActiveRoomStore = (function() {
         loop.request("RemoveBrowserSharingListener", this.getStoreState().windowId);
         loop.unsubscribe("BrowserSwitch", this._browserSharingListener);
         this._browserSharingListener = null;
+        loop.unsubscribe("CursorPositionChange", this._sendCursorPositionListener);
       }
 
       if (this._sdkDriver.endScreenShare()) {

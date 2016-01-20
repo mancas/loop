@@ -599,37 +599,41 @@ loop.shared.views = (function(_, mozL10n) {
       isLoading: React.PropTypes.bool.isRequired,
       mediaType: React.PropTypes.string.isRequired,
       posterUrl: React.PropTypes.string,
-      remoteCursorLeft: React.PropTypes.number,
-      remoteCursorTop: React.PropTypes.number,
+      remoteCursorPosition: React.PropTypes.object,
       // Expecting "local" or "remote".
       srcMediaElement: React.PropTypes.object
     },
 
     getInitialState: function() {
       return {
-        offsetLeft: 0,
-        offsetTop: 0,
+        cursorOffset: {
+          left: 0,
+          top: 0
+        },
         streamVideoHeight: 0,
         streamVideoWidth: 0
       };
     },
 
     componentWillReceiveProps: function(nextProps) {
-      if (!nextProps.remoteCursorLeft || !nextProps.remoteCursorTop) {
+      if (!nextProps.remoteCursorPosition) {
         return;
       }
 
       // We need to calculate the cursor postion based on the current video stream dimensions
-      var percentX = nextProps.remoteCursorLeft;
-      var percentY = nextProps.remoteCursorTop;
+      var percentX = nextProps.remoteCursorPosition.left;
+      var percentY = nextProps.remoteCursorPosition.top;
 
       var cursorPositionX = (this.state.streamVideoWidth * percentX) / 100;
       var cursorPositionY = (this.state.streamVideoHeight * percentY) / 100;
+      console.info(nextProps.remoteCursorPosition);
 console.info("cursor position X", cursorPositionX);
 console.info("cursor position Y", cursorPositionY);
       this.setState({
-        cursorPositionX: cursorPositionX,
-        cursorPositionY: cursorPositionY
+        cursorPosition: {
+          left: cursorPositionX,
+          top: cursorPositionY
+        }
       });
     },
 
@@ -680,8 +684,10 @@ console.info("cursor position Y", cursorPositionY);
       }
 
       this.setState({
-        offsetLeft: (clientWidth - streamVideoWidth) / 2,
-        offsetTop: (clientHeight - streamVideoHeight) / 2,
+        cursorOffset: {
+          left: (clientWidth - streamVideoWidth) / 2,
+          top: (clientHeight - streamVideoHeight) / 2
+        },
         streamVideoHeight: streamVideoHeight,
         streamVideoWidth: streamVideoWidth
       });
@@ -704,9 +710,7 @@ console.info("cursor position Y", cursorPositionY);
       }
 
       var videoElement = this.getDOMNode().querySelector("video");
-      if (this.props.remoteCursorLeft && this.props.remoteCursorTop) {
-        videoElement.addEventListener("loadeddata", this.handleVideoUpdate);
-      }
+      videoElement.addEventListener("loadeddata", this.handleVideoUpdate);
 
       if (videoElement.tagName.toLowerCase() !== "video") {
         // Must be displaying the avatar view, so don't try and attach video.
@@ -756,7 +760,7 @@ console.info("cursor position Y", cursorPositionY);
       }
 
       // TODO: attach a handle in case we need to send standalone cursor to the link generator
-      if (this.props.remoteCursorLeft && this.props.remoteCursorTop) {
+      if (this.props.remoteCursorPosition) {
 
       }
 
@@ -771,12 +775,10 @@ console.info("cursor position Y", cursorPositionY);
       // to the remote audio at some stage in the future.
       return (
         <div className="remote-video-box">
-        { this.props.remoteCursorLeft && this.props.remoteCursorTop ?
+        { this.props.remoteCursorPosition ?
           <RemoteCursorView
-            offsetLeft={this.state.offsetLeft}
-            offsetTop={this.state.offsetTop}
-            remoteCursorLeft={this.state.cursorPositionX}
-            remoteCursorTop={this.state.cursorPositionY} /> :
+            remoteCursorOffset={this.state.cursorOffset}
+            remoteCursorPosition={this.state.cursorPosition} /> :
             null }
           <video {...optionalProps}
                  className={this.props.mediaType + "-video"}
@@ -801,8 +803,7 @@ console.info("cursor position Y", cursorPositionY);
       // Passing in matchMedia, allows it to be overriden for ui-showcase's
       // benefit. We expect either the override or window.matchMedia.
       matchMedia: React.PropTypes.func.isRequired,
-      remoteCursorLeft: React.PropTypes.number,
-      remoteCursorTop: React.PropTypes.number,
+      remoteCursorPosition: React.PropTypes.object,
       remotePosterUrl: React.PropTypes.string,
       remoteSrcMediaElement: React.PropTypes.object,
       renderRemoteVideo: React.PropTypes.bool.isRequired,
@@ -910,8 +911,7 @@ console.info("cursor position Y", cursorPositionY);
                 isLoading={this.props.isScreenShareLoading}
                 mediaType="screen-share"
                 posterUrl={this.props.screenSharePosterUrl}
-                remoteCursorLeft={this.props.remoteCursorLeft}
-                remoteCursorTop={this.props.remoteCursorTop}
+                remoteCursorPosition={this.props.remoteCursorPosition}
                 srcMediaElement={this.props.screenShareMediaElement} />
               {this.props.displayScreenShare ? this.props.children : null}
             </div>
@@ -931,20 +931,18 @@ console.info("cursor position Y", cursorPositionY);
     mixins: [React.addons.PureRenderMixin],
 
     propTypes: {
-      offsetLeft: React.PropTypes.number,
-      offsetTop: React.PropTypes.number,
-      remoteCursorLeft: React.PropTypes.number,
-      remoteCursorTop: React.PropTypes.number
+      remoteCursorOffset: React.PropTypes.object,
+      remoteCursorPosition: React.PropTypes.object
     },
 
     render: function () {
-      console.log("remoteCursorTop", this.props.remoteCursorTop);
-      console.log("remoteCursorLeft", this.props.remoteCursorLeft);
-      console.log("offsetTop", this.props.offsetTop);
-      console.log("offsetLeft", this.props.offsetLeft);
+      console.log("remoteCursorTop", this.props.remoteCursorPosition.top);
+      console.log("remoteCursorLeft", this.props.remoteCursorPosition.left);
+      console.log("offsetTop", this.props.remoteCursorOffset.top);
+      console.log("offsetLeft", this.props.remoteCursorOffset.left);
       var cursorStyle = {
-        top: this.props.remoteCursorTop + this.props.offsetTop,
-        left: this.props.remoteCursorLeft + this.props.offsetLeft
+        top: this.props.remoteCursorPosition.top + this.props.remoteCursorOffset.top,
+        left: this.props.remoteCursorPosition.left + this.props.remoteCursorOffset.left
       };
 
       return (
