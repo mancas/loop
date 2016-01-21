@@ -606,7 +606,7 @@ loop.shared.views = (function(_, mozL10n) {
 
     getInitialState: function() {
       return {
-        cursorOffset: {
+        videoLetterboxing: {
           left: 0,
           top: 0
         },
@@ -631,8 +631,8 @@ console.info("cursor position X", cursorPositionX);
 console.info("cursor position Y", cursorPositionY);
       this.setState({
         cursorPosition: {
-          left: cursorPositionX,
-          top: cursorPositionY
+          left: cursorPositionX + this.state.videoLetterboxing.left,
+          top: cursorPositionY + this.state.videoLetterboxing.top
         }
       });
     },
@@ -665,8 +665,7 @@ console.info("cursor position Y", cursorPositionY);
       var streamVideoWidth = 0;
       var streamVideoHeight = 0;
 
-      // Both dimensions are bigger than the screen size
-      if (realVideoHeight >= clientHeight && realVideoWidth >= clientWidth) {
+      if (realVideoWidth >= clientWidth) {
         // Reduce video width
         streamVideoWidth = clientWidth;
         streamVideoHeight = (realVideoHeight * clientWidth) / realVideoWidth;
@@ -676,6 +675,9 @@ console.info("cursor position Y", cursorPositionY);
           streamVideoWidth = (realVideoWidth * clientHeight) / realVideoHeight;
           streamVideoHeight = clientHeight;
         }
+      } else if (realVideoHeight >= clientHeight) {
+        streamVideoWidth = (realVideoWidth * clientHeight) / realVideoHeight;
+        streamVideoHeight = clientHeight;
       } else {
         // In this case we should keep the real dimension of the video since the
         // video fits in the screen without reducing width or height
@@ -684,7 +686,7 @@ console.info("cursor position Y", cursorPositionY);
       }
 
       this.setState({
-        cursorOffset: {
+        videoLetterboxing: {
           left: (clientWidth - streamVideoWidth) / 2,
           top: (clientHeight - streamVideoHeight) / 2
         },
@@ -777,7 +779,6 @@ console.info("cursor position Y", cursorPositionY);
         <div className="remote-video-box">
         { this.props.remoteCursorPosition ?
           <RemoteCursorView
-            remoteCursorOffset={this.state.cursorOffset}
             remoteCursorPosition={this.state.cursorPosition} /> :
             null }
           <video {...optionalProps}
@@ -931,22 +932,15 @@ console.info("cursor position Y", cursorPositionY);
     mixins: [React.addons.PureRenderMixin],
 
     propTypes: {
-      remoteCursorOffset: React.PropTypes.object,
       remoteCursorPosition: React.PropTypes.object
     },
 
     render: function () {
       console.log("remoteCursorTop", this.props.remoteCursorPosition.top);
       console.log("remoteCursorLeft", this.props.remoteCursorPosition.left);
-      console.log("offsetTop", this.props.remoteCursorOffset.top);
-      console.log("offsetLeft", this.props.remoteCursorOffset.left);
-      var cursorStyle = {
-        top: this.props.remoteCursorPosition.top + this.props.remoteCursorOffset.top,
-        left: this.props.remoteCursorPosition.left + this.props.remoteCursorOffset.left
-      };
 
       return (
-        <div className="remote-cursor" style={cursorStyle} />
+        <div className="remote-cursor" style={this.props.remoteCursorPosition} />
       );
     }
   });

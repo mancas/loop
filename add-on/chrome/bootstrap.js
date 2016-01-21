@@ -489,8 +489,7 @@ var WindowListener = {
           gBrowser.addEventListener("DOMTitleChanged", this);
           this._browserSharePaused = false;
 
-          this._mousemoveHandler = this.handleMousemove.bind(this);
-          gBrowser.addEventListener("mousemove", this._mousemoveHandler);
+          gBrowser.addEventListener("mousemove", this);
         }
 
         this._maybeShowBrowserSharingInfoBar();
@@ -511,7 +510,7 @@ var WindowListener = {
         this._hideBrowserSharingInfoBar();
         gBrowser.tabContainer.removeEventListener("TabSelect", this);
         gBrowser.removeEventListener("DOMTitleChanged", this);
-        gBrowser.removeEventListener("mousemove", this._mousemoveHandler);
+        gBrowser.removeEventListener("mousemove", this);
         this._listeningToTabSelect = false;
         this._browserSharePaused = false;
         this._mousemoveHandler = false;
@@ -651,6 +650,9 @@ var WindowListener = {
               this._maybeShowBrowserSharingInfoBar();
             }
             break;
+          case "mousemove":
+            this.handleMousemove(event);
+            break;
           }
       },
 
@@ -675,8 +677,10 @@ var WindowListener = {
         this.lastCursorX = deltaX;
         this.lastCursorY = deltaY;
 
-        this.LoopAPI.broadcastPushMessage("CursorPositionChange",
-          { cursorX: deltaX, cursorY: deltaY });
+        this.LoopAPI.broadcastPushMessage("CursorPositionChange", {
+          cursorX: (deltaX * 100) / browserBox.width,
+          cursorY: (deltaY * 100) / browserBox.height
+        });
       },
 
       /**
