@@ -253,7 +253,7 @@ loop.store.ActiveRoomStore = (function() {
         "connectionFailure",
         "setMute",
         "screenSharingState",
-        "receivedCursorPosition",
+        "receivedCursorData",
         "receivingScreenShare",
         "remotePeerDisconnected",
         "remotePeerConnected",
@@ -859,19 +859,23 @@ loop.store.ActiveRoomStore = (function() {
         actionData.state === SCREEN_SHARE_STATES.ACTIVE);
     },
 
-    receivedCursorPosition: function(actionData) {
+    receivedCursorData: function(actionData) {
       // TODO: Remove this
       console.info("received!", actionData);
-      var sent = new Date(actionData.sentTimestamp);
-      var received = new Date(actionData.receivedTimestamp);
-      console.info("Delay in ms", received.getTime() - sent.getTime());
-      // TODO: handle cursor position if it's desktop instead of standalone
-      this.setStoreState({
-        remoteCursorPosition: {
-          top: actionData.top,
-          left: actionData.left
-        }
-      });
+      switch (actionData.type) {
+        case CURSOR_MESSAGE_TYPES.POSITION:
+          var sent = new Date(actionData.sentTimestamp);
+          var received = new Date(actionData.receivedTimestamp);
+          console.info("Delay in ms", received.getTime() - sent.getTime());
+          // TODO: handle cursor position if it's desktop instead of standalone
+          this.setStoreState({
+            remoteCursorPosition: {
+              top: actionData.top,
+              left: actionData.left
+            }
+          });
+          break;
+      }
     },
 
     /**

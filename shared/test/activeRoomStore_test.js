@@ -1538,13 +1538,13 @@ describe("loop.store.ActiveRoomStore", function() {
     });
   });
 
-  describe("#receivedCursorPosition", function() {
+  describe("#receivedCursorData", function() {
     beforeEach(function() {
       store.setStoreState({ windowId: "1234" });
     });
 
     it("should save the state", function() {
-      store.receivedCursorPosition(new sharedActions.ReceivedCursorPosition({
+      store.receivedCursorData(new sharedActions.ReceivedCursorData({
         type: CURSOR_MESSAGE_TYPES.POSITION,
         top: 10,
         left: 10,

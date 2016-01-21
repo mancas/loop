@@ -133,7 +133,7 @@ loop.shared.actions = (function() {
     /**
      * Used to send a message to the other peer.
      */
-    SendCursorPosition: Action.define("sendCursorPosition", {
+    SendCursorData: Action.define("sendCursorData", {
       type: String,
       top: Number,
       left: Number
@@ -143,7 +143,7 @@ loop.shared.actions = (function() {
     /**
      * Notifies that a message has been received from the other peer.
      */
-    ReceivedCursorPosition: Action.define("receivedCursorPosition", {
+    ReceivedCursorDara: Action.define("receivedCursorData", {
       type: String,
       top: Number,
       left: Number,

@@ -754,7 +754,7 @@ loop.OTSdkDriver = (function() {
           switch (message.type) {
             case CURSOR_MESSAGE_TYPES.POSITION:
               this.dispatcher.dispatch(
-                new sharedActions.ReceivedCursorPosition(message));
+                new sharedActions.ReceivedCursorData(message));
               break;
           }
           return;
