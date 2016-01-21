@@ -710,13 +710,13 @@ console.info("cursor position Y", cursorPositionY);
       }
 
       var videoElement = this.getDOMNode().querySelector("video");
-      videoElement.addEventListener("loadeddata", this.handleVideoUpdate);
 
-      if (videoElement.tagName.toLowerCase() !== "video") {
+      if (!videoElement || videoElement.tagName.toLowerCase() !== "video") {
         // Must be displaying the avatar view, so don't try and attach video.
         return;
       }
 
+      videoElement.addEventListener("loadeddata", this.handleVideoUpdate);
       // Set the src of our video element
       var attrName = "";
       if ("srcObject" in videoElement) {
