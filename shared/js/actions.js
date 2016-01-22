@@ -143,7 +143,7 @@ loop.shared.actions = (function() {
     /**
      * Notifies that a message has been received from the other peer.
      */
-    ReceivedCursorDara: Action.define("receivedCursorData", {
+    ReceivedCursorData: Action.define("receivedCursorData", {
       type: String,
       top: Number,
       left: Number,

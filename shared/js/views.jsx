@@ -599,7 +599,7 @@ loop.shared.views = (function(_, mozL10n) {
       isLoading: React.PropTypes.bool.isRequired,
       mediaType: React.PropTypes.string.isRequired,
       posterUrl: React.PropTypes.string,
-      remoteCursorPosition: React.PropTypes.object,
+      shouldRenderRemoteCursor: React.PropTypes.bool,
       // Expecting "local" or "remote".
       srcMediaElement: React.PropTypes.object
     },
@@ -613,28 +613,6 @@ loop.shared.views = (function(_, mozL10n) {
         streamVideoHeight: 0,
         streamVideoWidth: 0
       };
-    },
-
-    componentWillReceiveProps: function(nextProps) {
-      if (!nextProps.remoteCursorPosition) {
-        return;
-      }
-
-      // We need to calculate the cursor postion based on the current video stream dimensions
-      var percentX = nextProps.remoteCursorPosition.left;
-      var percentY = nextProps.remoteCursorPosition.top;
-
-      var cursorPositionX = (this.state.streamVideoWidth * percentX) / 100;
-      var cursorPositionY = (this.state.streamVideoHeight * percentY) / 100;
-      console.info(nextProps.remoteCursorPosition);
-console.info("cursor position X", cursorPositionX);
-console.info("cursor position Y", cursorPositionY);
-      this.setState({
-        cursorPosition: {
-          left: cursorPositionX + this.state.videoLetterboxing.left,
-          top: cursorPositionY + this.state.videoLetterboxing.top
-        }
-      });
     },
 
     componentDidMount: function() {
@@ -655,43 +633,19 @@ console.info("cursor position Y", cursorPositionY);
     },
 
     handleVideoUpdate: function(event) {
-      console.info(event);
       var clientWidth = event.target.clientWidth;
       var clientHeight = event.target.clientHeight;
 
       var realVideoWidth = event.target.videoWidth;
       var realVideoHeight = event.target.videoHeight;
 
-      var streamVideoWidth = 0;
-      var streamVideoHeight = 0;
-
-      if (realVideoWidth >= clientWidth) {
-        // Reduce video width
-        streamVideoWidth = clientWidth;
-        streamVideoHeight = (realVideoHeight * clientWidth) / realVideoWidth;
-
-        // In this case we need to do extra work because the video can't be 100% width
-        if (streamVideoHeight > clientHeight) {
-          streamVideoWidth = (realVideoWidth * clientHeight) / realVideoHeight;
-          streamVideoHeight = clientHeight;
-        }
-      } else if (realVideoHeight >= clientHeight) {
-        streamVideoWidth = (realVideoWidth * clientHeight) / realVideoHeight;
-        streamVideoHeight = clientHeight;
-      } else {
-        // In this case we should keep the real dimension of the video since the
-        // video fits in the screen without reducing width or height
-        streamVideoWidth = realVideoWidth;
-        streamVideoHeight = realVideoHeight;
-      }
-
       this.setState({
-        videoLetterboxing: {
-          left: (clientWidth - streamVideoWidth) / 2,
-          top: (clientHeight - streamVideoHeight) / 2
-        },
-        streamVideoHeight: streamVideoHeight,
-        streamVideoWidth: streamVideoWidth
+        videoSize: {
+          clientWidth: event.target.clientWidth,
+          clientHeight: event.target.clientHeight,
+          realVideoWidth: event.target.videoWidth,
+          realVideoHeight: event.target.videoHeight
+        }
       });
     },
 
@@ -762,9 +716,6 @@ console.info("cursor position Y", cursorPositionY);
       }
 
       // TODO: attach a handle in case we need to send standalone cursor to the link generator
-      if (this.props.remoteCursorPosition) {
-
-      }
 
       // For now, always mute media. For local media, we should be muted anyway,
       // as we don't want to hear ourselves speaking.
@@ -777,9 +728,9 @@ console.info("cursor position Y", cursorPositionY);
       // to the remote audio at some stage in the future.
       return (
         <div className="remote-video-box">
-        { this.props.remoteCursorPosition ?
+        { this.state.videoSize && this.props.shouldRenderRemoteCursor ?
           <RemoteCursorView
-            remoteCursorPosition={this.state.cursorPosition} /> :
+            videoSize={this.state.videoSize} /> :
             null }
           <video {...optionalProps}
                  className={this.props.mediaType + "-video"}
@@ -804,7 +755,6 @@ console.info("cursor position Y", cursorPositionY);
       // Passing in matchMedia, allows it to be overriden for ui-showcase's
       // benefit. We expect either the override or window.matchMedia.
       matchMedia: React.PropTypes.func.isRequired,
-      remoteCursorPosition: React.PropTypes.object,
       remotePosterUrl: React.PropTypes.string,
       remoteSrcMediaElement: React.PropTypes.object,
       renderRemoteVideo: React.PropTypes.bool.isRequired,
@@ -912,7 +862,7 @@ console.info("cursor position Y", cursorPositionY);
                 isLoading={this.props.isScreenShareLoading}
                 mediaType="screen-share"
                 posterUrl={this.props.screenSharePosterUrl}
-                remoteCursorPosition={this.props.remoteCursorPosition}
+                shouldRenderRemoteCursor={true}
                 srcMediaElement={this.props.screenShareMediaElement} />
               {this.props.displayScreenShare ? this.props.children : null}
             </div>
@@ -929,18 +879,87 @@ console.info("cursor position Y", cursorPositionY);
   });
 
   var RemoteCursorView = React.createClass({
-    mixins: [React.addons.PureRenderMixin],
+    mixins: [
+      React.addons.PureRenderMixin,
+      loop.store.StoreMixin("remoteCursorStore")
+    ],
 
     propTypes: {
-      remoteCursorPosition: React.PropTypes.object
+      videoSize: React.PropTypes.object
+    },
+
+    componentWillMount: function() {
+      console.info(this);
+      this._calculateVideoLetterboxing();
+    },
+
+    _calculateVideoLetterboxing: function() {
+      var streamVideoWidth = 0;
+      var streamVideoHeight = 0;
+
+      var clientWidth = this.props.videoSize.clientWidth;
+      var clientHeight = this.props.videoSize.clientHeight;
+
+      var realVideoWidth = this.props.videoSize.realVideoWidth;
+      var realVideoHeight = this.props.videoSize.realVideoHeight;
+
+      if (realVideoWidth >= clientWidth) {
+        // Reduce video width
+        streamVideoWidth = clientWidth;
+        streamVideoHeight = (realVideoHeight * clientWidth) / realVideoWidth;
+
+        // In this case we need to do extra work because the video can't be 100% width
+        if (streamVideoHeight > clientHeight) {
+          streamVideoWidth = (realVideoWidth * clientHeight) / realVideoHeight;
+          streamVideoHeight = clientHeight;
+        }
+      } else if (realVideoHeight >= clientHeight) {
+        streamVideoWidth = (realVideoWidth * clientHeight) / realVideoHeight;
+        streamVideoHeight = clientHeight;
+      } else {
+        // In this case we should keep the real dimension of the video since the
+        // video fits in the screen without reducing width or height
+        streamVideoWidth = realVideoWidth;
+        streamVideoHeight = realVideoHeight;
+      }
+
+      this.setState({
+        videoLetterboxing: {
+          left: (clientWidth - streamVideoWidth) / 2,
+          top: (clientHeight - streamVideoHeight) / 2
+        },
+        streamVideoHeight: streamVideoHeight,
+        streamVideoWidth: streamVideoWidth
+      });
+    },
+
+    calculateCursorPosition: function() {
+      // We need to calculate the cursor postion based on the current video stream dimensions
+      var remoteCursorPosition = this.state.remoteCursorPosition;
+      var percentX = remoteCursorPosition.left;
+      var percentY = remoteCursorPosition.top;
+
+      var cursorPositionX = (this.state.streamVideoWidth * percentX) / 100;
+      var cursorPositionY = (this.state.streamVideoHeight * percentY) / 100;
+console.info("cursor position X", cursorPositionX);
+console.info("cursor position Y", cursorPositionY);
+
+      return {
+        left: cursorPositionX + this.state.videoLetterboxing.left,
+        top: cursorPositionY + this.state.videoLetterboxing.top
+      };
     },
 
     render: function () {
-      console.log("remoteCursorTop", this.props.remoteCursorPosition.top);
-      console.log("remoteCursorLeft", this.props.remoteCursorPosition.left);
+      //console.log("remoteCursorTop", this.props.remoteCursorPosition.top);
+      //console.log("remoteCursorLeft", this.props.remoteCursorPosition.left);
+      console.info(this.getStoreState());
+      if (!this.state.remoteCursorPosition) {
+        return null;
+      }
 
       return (
-        <div className="remote-cursor" style={this.props.remoteCursorPosition} />
+        <div className="remote-cursor" style={this.calculateCursorPosition()} />
       );
     }
   });

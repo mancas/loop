@@ -619,7 +619,6 @@ loop.standaloneRoomViews = (function(mozL10n) {
             localSrcMediaElement={this.state.localSrcMediaElement}
             localVideoMuted={this.state.videoMuted}
             matchMedia={this.state.matchMedia || window.matchMedia.bind(window)}
-            remoteCursorPosition={this.state.remoteCursorPosition}
             remotePosterUrl={this.props.remotePosterUrl}
             remoteSrcMediaElement={this.state.remoteSrcMediaElement}
             renderRemoteVideo={this.shouldRenderRemoteVideo()}

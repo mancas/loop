@@ -40,7 +40,6 @@ loop.store.ActiveRoomStore = (function() {
   var CHAT_CONTENT_TYPES = loop.shared.utils.CHAT_CONTENT_TYPES;
   var FAILURE_DETAILS = loop.shared.utils.FAILURE_DETAILS;
   var SCREEN_SHARE_STATES = loop.shared.utils.SCREEN_SHARE_STATES;
-  var CURSOR_MESSAGE_TYPES = loop.shared.utils.CURSOR_MESSAGE_TYPES;
 
   // Error numbers taken from
   // https://github.com/mozilla-services/loop-server/blob/master/loop/errno.json
@@ -253,7 +252,6 @@ loop.store.ActiveRoomStore = (function() {
         "connectionFailure",
         "setMute",
         "screenSharingState",
-        "receivedCursorData",
         "receivingScreenShare",
         "remotePeerDisconnected",
         "remotePeerConnected",
@@ -859,25 +857,6 @@ loop.store.ActiveRoomStore = (function() {
         actionData.state === SCREEN_SHARE_STATES.ACTIVE);
     },
 
-    receivedCursorData: function(actionData) {
-      // TODO: Remove this
-      console.info("received!", actionData);
-      switch (actionData.type) {
-        case CURSOR_MESSAGE_TYPES.POSITION:
-          var sent = new Date(actionData.sentTimestamp);
-          var received = new Date(actionData.receivedTimestamp);
-          console.info("Delay in ms", received.getTime() - sent.getTime());
-          // TODO: handle cursor position if it's desktop instead of standalone
-          this.setStoreState({
-            remoteCursorPosition: {
-              top: actionData.top,
-              left: actionData.left
-            }
-          });
-          break;
-      }
-    },
-
     /**
      * Used to note the current state of receiving screenshare data.
      *
@@ -967,14 +946,6 @@ loop.store.ActiveRoomStore = (function() {
       }.bind(this));
     },
 
-    _handleSendCursorPosition: function(event) {
-      this._sdkDriver.sendCursorMessage({
-        type: CURSOR_MESSAGE_TYPES.POSITION,
-        top: event.cursorY,
-        left: event.cursorX
-      });
-    },
-
     /**
      * Initiates a browser tab sharing publisher.
      *
@@ -990,7 +961,6 @@ loop.store.ActiveRoomStore = (function() {
       }));
 
       this._browserSharingListener = this._handleSwitchBrowserShare.bind(this);
-      this._sendCursorPositionListener = this._handleSendCursorPosition.bind(this);
 
       // Set up a listener for watching screen shares. This will get notified
       // with the first windowId when it is added, so we start off the sharing
@@ -998,7 +968,6 @@ loop.store.ActiveRoomStore = (function() {
       loop.request("AddBrowserSharingListener", this.getStoreState().windowId)
         .then(this._browserSharingListener);
       loop.subscribe("BrowserSwitch", this._browserSharingListener);
-      loop.subscribe("CursorPositionChange", this._sendCursorPositionListener);
     },
 
     /**
@@ -1010,7 +979,6 @@ loop.store.ActiveRoomStore = (function() {
         loop.request("RemoveBrowserSharingListener", this.getStoreState().windowId);
         loop.unsubscribe("BrowserSwitch", this._browserSharingListener);
         this._browserSharingListener = null;
-        loop.unsubscribe("CursorPositionChange", this._sendCursorPositionListener);
       }
 
       if (this._sdkDriver.endScreenShare()) {
