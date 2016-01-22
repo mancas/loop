@@ -633,12 +633,6 @@ loop.shared.views = (function(_, mozL10n) {
     },
 
     handleVideoUpdate: function(event) {
-      var clientWidth = event.target.clientWidth;
-      var clientHeight = event.target.clientHeight;
-
-      var realVideoWidth = event.target.videoWidth;
-      var realVideoHeight = event.target.videoHeight;
-
       this.setState({
         videoSize: {
           clientWidth: event.target.clientWidth,
@@ -951,8 +945,6 @@ console.info("cursor position Y", cursorPositionY);
     },
 
     render: function () {
-      //console.log("remoteCursorTop", this.props.remoteCursorPosition.top);
-      //console.log("remoteCursorLeft", this.props.remoteCursorPosition.left);
       console.info(this.getStoreState());
       if (!this.state.remoteCursorPosition) {
         return null;

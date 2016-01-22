@@ -559,7 +559,7 @@ describe("loop.shared.views", function() {
         }
       });
 
-      var element = view.getDOMNode().querySelector('video');
+      var element = view.getDOMNode().querySelector("video");
 
       expect(element).not.eql(null);
       expect(element.className).eql("local-video");
@@ -616,7 +616,7 @@ describe("loop.shared.views", function() {
           querySelector: function() {
             return {
               tagName: "DIV"
-            }
+            };
           }
         });
 
