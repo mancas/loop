@@ -14,7 +14,9 @@ loop.store.RemoteCursorStore = (function() {
    * A store to handle remote cursors events.
    */
   var RemoteCursorStore = loop.store.createStore({
-    actions: [],
+    actions: [
+      "receivedCursorData"
+    ],
 
     /**
      * Initializes the store.
@@ -58,6 +60,28 @@ loop.store.RemoteCursorStore = (function() {
         top: event.cursorY,
         left: event.cursorX
       });
+    },
+
+    /**
+     * Receives cursor data.
+     *
+     * @param {sharedActions.receivedCursorData} actionData
+     */
+    receivedCursorData: function(actionData) {
+      switch (actionData.type) {
+        case CURSOR_MESSAGE_TYPES.POSITION:
+          var sent = new Date(actionData.sentTimestamp);
+          var received = new Date(actionData.receivedTimestamp);
+          console.log("Delay in ms", received.getTime() - sent.getTime());
+          // TODO: handle cursor position if it's desktop instead of standalone
+          this.setStoreState({
+            remoteCursorPosition: {
+              top: actionData.top,
+              left: actionData.left
+            }
+          });
+          break;
+      }
     }
   });
 

@@ -66,4 +66,20 @@ describe("loop.store.RemoteCursorStore", function() {
       });
     });
   });
+
+  describe("#receivedCursorData", function() {
+    it("should save the state", function() {
+      store.receivedCursorData(new sharedActions.ReceivedCursorData({
+        type: CURSOR_MESSAGE_TYPES.POSITION,
+        top: 10,
+        left: 10,
+        receivedTimestamp: "1970-01-01T00:00:00.000Z"
+      }));
+
+      expect(store.getStoreState().remoteCursorPosition).eql({
+        top: 10,
+        left: 10
+      });
+    });
+  });
 });

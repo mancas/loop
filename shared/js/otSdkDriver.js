@@ -10,6 +10,7 @@ loop.OTSdkDriver = (function() {
   var FAILURE_DETAILS = loop.shared.utils.FAILURE_DETAILS;
   var STREAM_PROPERTIES = loop.shared.utils.STREAM_PROPERTIES;
   var SCREEN_SHARE_STATES = loop.shared.utils.SCREEN_SHARE_STATES;
+  var CURSOR_MESSAGE_TYPES = loop.shared.utils.CURSOR_MESSAGE_TYPES;
 
   /**
    * This is a wrapper for the OT sdk. It is used to translate the SDK events into
@@ -693,18 +694,7 @@ loop.OTSdkDriver = (function() {
         }
 
         channel.on({
-          message: function(ev) {
-            try {
-              var message = JSON.parse(ev.data);
-              /* Append the timestamp. This is the time that gets shown. */
-              message.receivedTimestamp = (new Date()).toISOString();
-
-              this.dispatcher.dispatch(
-                new sharedActions.ReceivedTextChatMessage(message));
-            } catch (ex) {
-              console.error("Failed to process incoming chat message", ex);
-            }
-          }.bind(this),
+          message: this._handleMessage.bind(this),
 
           close: function() {
             // XXX We probably want to dispatch and handle this somehow.
@@ -752,6 +742,29 @@ loop.OTSdkDriver = (function() {
 
         this._checkDataChannelsAvailable();
       }.bind(this));
+    },
+
+    _handleMessage: function(ev) {
+      try {
+        var message = JSON.parse(ev.data);
+        /* Append the timestamp. */
+        message.receivedTimestamp = (new Date()).toISOString();
+
+        if (message.type) {
+          switch (message.type) {
+            case CURSOR_MESSAGE_TYPES.POSITION:
+              this.dispatcher.dispatch(
+                new sharedActions.ReceivedCursorData(message));
+              break;
+          }
+          return;
+        }
+
+        this.dispatcher.dispatch(
+          new sharedActions.ReceivedTextChatMessage(message));
+      } catch (ex) {
+        console.error("Failed to process incoming chat message", ex);
+      }
     },
 
     /**
