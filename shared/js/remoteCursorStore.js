@@ -36,6 +36,15 @@ loop.store.RemoteCursorStore = (function() {
     },
 
     /**
+     * Returns initial state data for this active room.
+     */
+    getInitialStoreState: function() {
+      return {
+        remoteCursorPosition: null
+      };
+    },
+
+    /**
      * Sends cursor position through the sdk.
      *
      * @param {Object} event An object containing the cursor position in percentage
@@ -44,7 +53,11 @@ loop.store.RemoteCursorStore = (function() {
      *                       - cursorY: Top percentage
      */
     _cursorPositionChangeListener: function(event) {
-      // TODO: send data through sdk
+      this._sdkDriver.sendCursorMessage({
+        type: CURSOR_MESSAGE_TYPES.POSITION,
+        top: event.cursorY,
+        left: event.cursorX
+      });
     }
   });
 

@@ -776,6 +776,21 @@ loop.OTSdkDriver = (function() {
     },
 
     /**
+     * Sends the cursor position on the data channel.
+     *
+     * @param {String} message The message to send.
+     */
+    sendCursorMessage: function(message) {
+      if (!this._publisherChannel || !this._subscriberChannel) {
+        return;
+      }
+
+      message.sentTimestamp = (new Date()).toISOString();
+      message.userID = this.session.sessionId;
+      this._publisherChannel.send(JSON.stringify(message));
+    },
+
+    /**
      * Handles the event when the local stream is created.
      *
      * @param {StreamEvent} event The event details:
