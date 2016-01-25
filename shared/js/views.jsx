@@ -883,7 +883,6 @@ loop.shared.views = (function(_, mozL10n) {
     },
 
     componentWillMount: function() {
-      console.info(this);
       this._calculateVideoLetterboxing();
     },
 
@@ -945,7 +944,6 @@ console.info("cursor position Y", cursorPositionY);
     },
 
     render: function () {
-      console.info(this.getStoreState());
       if (!this.state.remoteCursorPosition) {
         return null;
       }

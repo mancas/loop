@@ -10,7 +10,6 @@ describe("loop.store.ActiveRoomStore", function() {
   var REST_ERRNOS = loop.shared.utils.REST_ERRNOS;
   var ROOM_STATES = loop.store.ROOM_STATES;
   var CHAT_CONTENT_TYPES = loop.shared.utils.CHAT_CONTENT_TYPES;
-  var CURSOR_MESSAGE_TYPES = loop.shared.utils.CURSOR_MESSAGE_TYPES;
   var FAILURE_DETAILS = loop.shared.utils.FAILURE_DETAILS;
   var SCREEN_SHARE_STATES = loop.shared.utils.SCREEN_SHARE_STATES;
   var ROOM_INFO_FAILURES = loop.shared.utils.ROOM_INFO_FAILURES;
@@ -52,7 +51,6 @@ describe("loop.store.ActiveRoomStore", function() {
       disconnectSession: sinon.stub(),
       forceDisconnectAll: sinon.stub().callsArg(0),
       retryPublishWithoutVideo: sinon.stub(),
-      sendCursorMessage: sinon.stub(),
       startScreenShare: sinon.stub(),
       switchAcquiredWindow: sinon.stub(),
       endScreenShare: sinon.stub().returns(true)
@@ -1538,26 +1536,6 @@ describe("loop.store.ActiveRoomStore", function() {
     });
   });
 
-  describe("#receivedCursorData", function() {
-    beforeEach(function() {
-      store.setStoreState({ windowId: "1234" });
-    });
-
-    it("should save the state", function() {
-      store.receivedCursorData(new sharedActions.ReceivedCursorData({
-        type: CURSOR_MESSAGE_TYPES.POSITION,
-        top: 10,
-        left: 10,
-        receivedTimestamp: "1970-01-01T00:00:00.000Z"
-      }));
-
-      expect(store.getStoreState().remoteCursorPosition).eql({
-        top: 10,
-        left: 10
-      });
-    });
-  });
-
   describe("#startBrowserShare", function() {
     var getSelectedTabMetadataStub;
 
@@ -1679,30 +1657,6 @@ describe("loop.store.ActiveRoomStore", function() {
       sinon.assert.calledOnce(getSelectedTabMetadataStub);
       sinon.assert.calledOnce(dispatcher.dispatch);
     });
-
-    it("should add a CursorPositionChange event listener", function() {
-      sandbox.stub(loop, "subscribe");
-      store.startBrowserShare(new sharedActions.StartBrowserShare());
-      sinon.assert.calledTwice(loop.subscribe);
-      sinon.assert.calledWith(loop.subscribe.getCall(1), "CursorPositionChange");
-    });
-
-    it("should send cursor position", function() {
-      store.startBrowserShare(new sharedActions.StartBrowserShare());
-      var cursorPosition = {
-        cursorX: 10,
-        cursorY: 10
-      };
-      // Simulates multiple requests.
-      LoopMochaUtils.publish("CursorPositionChange", cursorPosition);
-
-      sinon.assert.calledOnce(fakeSdkDriver.sendCursorMessage);
-      sinon.assert.calledWith(fakeSdkDriver.sendCursorMessage, {
-        type: CURSOR_MESSAGE_TYPES.POSITION,
-        top: (cursorPosition.cursorY * 100) / window.outerHeight,
-        left: (cursorPosition.cursorX * 100) / window.outerWidth
-      });
-    });
   });
 
   describe("Screen share Events", function() {
@@ -1770,18 +1724,6 @@ describe("loop.store.ActiveRoomStore", function() {
       store.endScreenShare();
 
       sinon.assert.calledOnce(requestStubs.RemoveBrowserSharingListener);
-    });
-
-    it("should remove the cursor position event listener", function() {
-      sandbox.stub(loop, "subscribe");
-      sandbox.stub(loop, "unsubscribe");
-      // Setup the listener.
-      store.startBrowserShare(new sharedActions.StartBrowserShare());
-
-      // Now stop the screen share.
-      store.endScreenShare();
-      sinon.assert.calledTwice(loop.unsubscribe);
-      sinon.assert.calledWith(loop.unsubscribe.getCall(1), "CursorPositionChange");
     });
   });
 

@@ -684,95 +684,14 @@ describe("loop.shared.views", function() {
         });
       });
 
-      it("should reduce video width", function() {
+      it("should save the video size", function() {
         view.handleVideoUpdate(fakeLoadedDataEvent);
-        var clientWidth = fakeLoadedDataEvent.target.clientWidth;
-        var clientHeight = fakeLoadedDataEvent.target.clientHeight;
 
-        var realVideoWidth = fakeLoadedDataEvent.target.videoWidth;
-        var realVideoHeight = fakeLoadedDataEvent.target.videoHeight;
-
-        var streamVideoWidth = clientWidth;
-        var streamVideoHeight = (realVideoHeight * clientWidth) / realVideoWidth;
-
-        expect(view.state.videoLetterboxing).eql({
-          left: (clientWidth - streamVideoWidth) / 2,
-          top: (clientHeight - streamVideoHeight) / 2
-        });
-      });
-
-      it("should reduce video width and height", function() {
-        fakeLoadedDataEvent = {
-          target: {
-            clientWidth: 1280,
-            clientHeight: 768,
-            videoWidth: 2580,
-            videoHeight: 2580
-          }
-        };
-        view.handleVideoUpdate(fakeLoadedDataEvent);
-        var clientWidth = fakeLoadedDataEvent.target.clientWidth;
-        var clientHeight = fakeLoadedDataEvent.target.clientHeight;
-
-        var realVideoWidth = fakeLoadedDataEvent.target.videoWidth;
-        var realVideoHeight = fakeLoadedDataEvent.target.videoHeight;
-
-        var streamVideoWidth = (realVideoWidth * clientHeight) / realVideoHeight;
-        var streamVideoHeight = clientHeight;
-
-        expect(view.state.videoLetterboxing).eql({
-          left: (clientWidth - streamVideoWidth) / 2,
-          top: (clientHeight - streamVideoHeight) / 2
-        });
-      });
-
-      it("should adjust video height when video width fits in the screen", function() {
-        fakeLoadedDataEvent = {
-          target: {
-            clientWidth: 1280,
-            clientHeight: 768,
-            videoWidth: 1200,
-            videoHeight: 2580
-          }
-        };
-        view.handleVideoUpdate(fakeLoadedDataEvent);
-        var clientWidth = fakeLoadedDataEvent.target.clientWidth;
-        var clientHeight = fakeLoadedDataEvent.target.clientHeight;
-
-        var realVideoWidth = fakeLoadedDataEvent.target.videoWidth;
-        var realVideoHeight = fakeLoadedDataEvent.target.videoHeight;
-
-        var streamVideoWidth = (realVideoWidth * clientHeight) / realVideoHeight;
-        var streamVideoHeight = clientHeight;
-
-        expect(view.state.videoLetterboxing).eql({
-          left: (clientWidth - streamVideoWidth) / 2,
-          top: (clientHeight - streamVideoHeight) / 2
-        });
-      });
-
-      it("should not adjust video size", function() {
-        fakeLoadedDataEvent = {
-          target: {
-            clientWidth: 1280,
-            clientHeight: 768,
-            videoWidth: 1200,
-            videoHeight: 700
-          }
-        };
-        view.handleVideoUpdate(fakeLoadedDataEvent);
-        var clientWidth = fakeLoadedDataEvent.target.clientWidth;
-        var clientHeight = fakeLoadedDataEvent.target.clientHeight;
-
-        var realVideoWidth = fakeLoadedDataEvent.target.videoWidth;
-        var realVideoHeight = fakeLoadedDataEvent.target.videoHeight;
-
-        var streamVideoWidth = realVideoWidth;
-        var streamVideoHeight = realVideoHeight;
-
-        expect(view.state.videoLetterboxing).eql({
-          left: (clientWidth - streamVideoWidth) / 2,
-          top: (clientHeight - streamVideoHeight) / 2
+        expect(view.state.videoSize).eql({
+          clientWidth: fakeLoadedDataEvent.target.clientWidth,
+          clientHeight: fakeLoadedDataEvent.target.clientHeight,
+          realVideoWidth: fakeLoadedDataEvent.target.videoWidth,
+          realVideoHeight: fakeLoadedDataEvent.target.videoHeight
         });
       });
     });
@@ -906,6 +825,176 @@ describe("loop.shared.views", function() {
 
       expect(view.getDOMNode().querySelector(".media-wrapper")
         .classList.contains("showing-remote-streams")).eql(true);
+    });
+  });
+
+  describe("RemoteCursorView", function() {
+    var view;
+    var fakeVideoSize;
+    var remoteCursorStore;
+
+    function mountTestComponent(props) {
+      props = props || {};
+      return TestUtils.renderIntoDocument(
+        React.createElement(sharedViews.RemoteCursorView, props));
+    }
+
+    beforeEach(function() {
+      remoteCursorStore = new loop.store.RemoteCursorStore(dispatcher, {
+        sdkDriver: {}
+      });
+
+      loop.store.StoreMixin.register({ remoteCursorStore: remoteCursorStore });
+
+      remoteCursorStore.setStoreState({
+        remoteCursorPosition: {
+          top: 0,
+          left: 0
+        }
+      });
+    });
+
+    it("should reduce video width", function() {
+      fakeVideoSize = {
+        clientWidth: 1280,
+        clientHeight: 768,
+        realVideoWidth: 2580,
+        realVideoHeight: 1536
+      };
+      view = mountTestComponent({
+        videoSize: fakeVideoSize
+      });
+
+      view._calculateVideoLetterboxing();
+      var clientWidth = fakeVideoSize.clientWidth;
+      var clientHeight = fakeVideoSize.clientHeight;
+
+      var realVideoWidth = fakeVideoSize.realVideoWidth;
+      var realVideoHeight = fakeVideoSize.realVideoHeight;
+
+      var streamVideoWidth = clientWidth;
+      var streamVideoHeight = (realVideoHeight * clientWidth) / realVideoWidth;
+
+      expect(view.state.videoLetterboxing).eql({
+        left: (clientWidth - streamVideoWidth) / 2,
+        top: (clientHeight - streamVideoHeight) / 2
+      });
+    });
+
+    it("should reduce video width and height", function() {
+      fakeVideoSize = {
+        clientWidth: 1280,
+        clientHeight: 768,
+        realVideoWidth: 2580,
+        realVideoHeight: 2580
+      };
+      view = mountTestComponent({
+        videoSize: fakeVideoSize
+      });
+
+      view._calculateVideoLetterboxing();
+      var clientWidth = fakeVideoSize.clientWidth;
+      var clientHeight = fakeVideoSize.clientHeight;
+
+      var realVideoWidth = fakeVideoSize.realVideoWidth;
+      var realVideoHeight = fakeVideoSize.realVideoHeight;
+
+      var streamVideoWidth = (realVideoWidth * clientHeight) / realVideoHeight;
+      var streamVideoHeight = clientHeight;
+
+      expect(view.state.videoLetterboxing).eql({
+        left: (clientWidth - streamVideoWidth) / 2,
+        top: (clientHeight - streamVideoHeight) / 2
+      });
+    });
+
+    it("should adjust video height when video width fits in the screen", function() {
+      fakeVideoSize = {
+        clientWidth: 1280,
+        clientHeight: 768,
+        realVideoWidth: 1200,
+        realVideoHeight: 2580
+      };
+      view = mountTestComponent({
+        videoSize: fakeVideoSize
+      });
+
+      view._calculateVideoLetterboxing();
+      var clientWidth = fakeVideoSize.clientWidth;
+      var clientHeight = fakeVideoSize.clientHeight;
+
+      var realVideoWidth = fakeVideoSize.realVideoWidth;
+      var realVideoHeight = fakeVideoSize.realVideoHeight;
+
+      var streamVideoWidth = (realVideoWidth * clientHeight) / realVideoHeight;
+      var streamVideoHeight = clientHeight;
+
+      expect(view.state.videoLetterboxing).eql({
+        left: (clientWidth - streamVideoWidth) / 2,
+        top: (clientHeight - streamVideoHeight) / 2
+      });
+    });
+
+    it("should not adjust video size", function() {
+      fakeVideoSize = {
+        clientWidth: 1280,
+        clientHeight: 768,
+        realVideoWidth: 1200,
+        realVideoHeight: 700
+      };
+      view = mountTestComponent({
+        videoSize: fakeVideoSize
+      });
+
+      view._calculateVideoLetterboxing();
+      var clientWidth = fakeVideoSize.clientWidth;
+      var clientHeight = fakeVideoSize.clientHeight;
+
+      var realVideoWidth = fakeVideoSize.realVideoWidth;
+      var realVideoHeight = fakeVideoSize.realVideoHeight;
+
+      var streamVideoWidth = realVideoWidth;
+      var streamVideoHeight = realVideoHeight;
+
+      expect(view.state.videoLetterboxing).eql({
+        left: (clientWidth - streamVideoWidth) / 2,
+        top: (clientHeight - streamVideoHeight) / 2
+      });
+    });
+
+    describe("#calculateCursorPosition", function() {
+      beforeEach(function() {
+        remoteCursorStore.setStoreState({
+          remoteCursorPosition: {
+            top: 10,
+            left: 10
+          }
+        });
+      });
+
+      it("should calculate the cursor position coords in the stream video", function() {
+        fakeVideoSize = {
+          clientWidth: 1280,
+          clientHeight: 768,
+          realVideoWidth: 2580,
+          realVideoHeight: 2580
+        };
+        view = mountTestComponent({
+          videoSize: fakeVideoSize
+        });
+        view._calculateVideoLetterboxing();
+        view.setState({
+          remoteCursorPosition: remoteCursorStore._storeState.remoteCursorPosition
+        })
+
+        var cursorPositionX = (view.state.streamVideoWidth * view.state.remoteCursorPosition.left) / 100;
+        var cursorPositionY = (view.state.streamVideoHeight * view.state.remoteCursorPosition.top) / 100;
+
+        expect(view.calculateCursorPosition()).eql({
+          left: cursorPositionX + view.state.videoLetterboxing.left,
+          top: cursorPositionY + view.state.videoLetterboxing.top
+        });
+      });
     });
   });
 });

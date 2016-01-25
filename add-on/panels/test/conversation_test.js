@@ -9,7 +9,7 @@ describe("loop.conversation", function() {
   var expect = chai.expect;
   var TestUtils = React.addons.TestUtils;
   var sharedActions = loop.shared.actions;
-  var fakeWindow, sandbox, setLoopPrefStub, mozL10nGet;
+  var fakeWindow, sandbox, setLoopPrefStub, mozL10nGet, remoteCursorStore, dispatcher;
 
   beforeEach(function() {
     sandbox = LoopMochaUtils.createSandbox();
@@ -77,6 +77,15 @@ describe("loop.conversation", function() {
       getStrings: function() { return JSON.stringify({ textContent: "fakeText" }); },
       locale: "en_US"
     });
+
+    dispatcher = new loop.Dispatcher();
+    sandbox.stub(dispatcher, "dispatch");
+
+    remoteCursorStore = new loop.store.RemoteCursorStore(dispatcher, {
+      sdkDriver: {}
+    });
+
+    loop.store.StoreMixin.register({ remoteCursorStore: remoteCursorStore });
   });
 
   afterEach(function() {
