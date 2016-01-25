@@ -10,6 +10,9 @@ const { interfaces: Ci, utils: Cu, classes: Cc } = Components;
 const kNSXUL = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
 const kBrowserSharingNotificationId = "loop-sharing-notification";
 
+const MIN_CURSOR_DELTA = 3;
+const MIN_CURSOR_INTERVAL = 100;
+
 Cu.import("resource://gre/modules/Services.jsm");
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 Cu.import("resource://gre/modules/AppConstants.jsm");
@@ -485,6 +488,8 @@ var WindowListener = {
           // metadata about the page is available when this event fires.
           gBrowser.addEventListener("DOMTitleChanged", this);
           this._browserSharePaused = false;
+
+          gBrowser.addEventListener("mousemove", this);
         }
 
         this._maybeShowBrowserSharingInfoBar();
@@ -505,6 +510,7 @@ var WindowListener = {
         this._hideBrowserSharingInfoBar();
         gBrowser.tabContainer.removeEventListener("TabSelect", this);
         gBrowser.removeEventListener("DOMTitleChanged", this);
+        gBrowser.removeEventListener("mousemove", this);
         this._listeningToTabSelect = false;
         this._browserSharePaused = false;
       },
@@ -641,7 +647,40 @@ var WindowListener = {
               this._maybeShowBrowserSharingInfoBar();
             }
             break;
+          case "mousemove":
+            this.handleMousemove(event);
+            break;
           }
+      },
+
+      /**
+       * Handles mousemove events from gBrowser.
+       */
+      handleMousemove: function(event) {
+        // Only update every so often.
+        let now = Date.now();
+        if (now - this.lastCursorTime < MIN_CURSOR_INTERVAL) {
+          return;
+        }
+        this.lastCursorTime = now;
+
+        // Skip the update if cursor is out of bounds or didn't move much.
+        let browserBox = gBrowser.selectedBrowser.boxObject;
+        let deltaX = event.screenX - browserBox.screenX;
+        let deltaY = event.screenY - browserBox.screenY;
+        if (deltaX < 0 || deltaX > browserBox.width ||
+            deltaY < 0 || deltaY > browserBox.height ||
+            (Math.abs(deltaX - this.lastCursorX) < MIN_CURSOR_DELTA &&
+             Math.abs(deltaY - this.lastCursorY) < MIN_CURSOR_DELTA)) {
+          return;
+        }
+        this.lastCursorX = deltaX;
+        this.lastCursorY = deltaY;
+
+        this.LoopAPI.broadcastPushMessage("CursorPositionChange", {
+          cursorX: (deltaX * 100) / browserBox.width,
+          cursorY: (deltaY * 100) / browserBox.height
+        });
       },
 
       /**
