@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="12px" height="12px" viewBox="0 0 12 12" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns">
+    <!-- Generator: Sketch 3.4.4 (17249) - http://www.bohemiancoding.com/sketch -->
+    <title>Fill 1</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Interaction-Flows" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage">
+        <g id="1366x768-Regular-Window" sketch:type="MSArtboardGroup" transform="translate(-1155.000000, -352.000000)" fill="#4A4A4A">
+            <g id="Panel-UI" sketch:type="MSLayerGroup" transform="translate(1002.000000, 70.000000)">
+                <g id="EmailLink-Copy" transform="translate(61.000000, 273.000000)" sketch:type="MSShapeGroup">
+                    <path d="M103.290881,20.9504776 C103.655134,20.9504776 103.950433,20.6551791 103.950433,20.2909254 L103.950433,9.65955224 C103.950433,9.29520896 103.655134,9 103.290881,9 L92.659597,9 C92.295209,9 92,9.29520896 92,9.65955224 L92,20.2909254 C92,20.6551791 92.295209,20.9504776 92.659597,20.9504776 L103.290881,20.9504776 Z M100.245612,20.9504776 L100.245612,16.3226418 L101.79903,16.3226418 L102.031552,14.5190597 L100.245612,14.5190597 L100.245612,13.3675522 C100.245612,12.8453731 100.390597,12.4895373 101.139433,12.4895373 L102.094507,12.4890896 L102.094507,10.8759851 C101.929239,10.8540448 101.362373,10.8049254 100.702776,10.8049254 C99.3258209,10.8049254 98.3831045,11.6454179 98.3831045,13.1889851 L98.3831045,14.5190597 L96.8257463,14.5190597 L96.8257463,16.3226418 L98.3831045,16.3226418 L98.3831045,20.9504776 L100.245612,20.9504776 Z" id="Fill-1"></path>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
