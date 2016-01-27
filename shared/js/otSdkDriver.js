@@ -98,7 +98,10 @@ loop.OTSdkDriver = (function() {
           // We use a single channel for text. To make things simpler, we
           // always send on the publisher channel, and receive on the subscriber
           // channel.
-          text: {}
+          text: {},
+          cursor: {
+            reliable: true
+          }
         }
       };
     },
@@ -715,6 +718,39 @@ loop.OTSdkDriver = (function() {
         this._subscriberChannel = channel;
         this._checkDataChannelsAvailable();
       }.bind(this));
+
+      this._setupCursorDataChannel(sdkSubscriberObject);
+    },
+
+    /**
+     * Setups the subscriber cursor data channel that will handle the messages
+     * received with the cursor information about the real stream size and position
+     * of the remote cursor.
+     *
+     * @param {OT.Subscriber} sdkSubscriberObject The subscriber object for the stream.
+     */
+    _setupCursorDataChannel: function(sdkSubscriberObject) {
+      sdkSubscriberObject._.getDataChannel("cursor", {}, function(err, channel) {
+        // Sends will queue until the channel is fully open.
+        if (err) {
+          console.error(err);
+          this._notifyMetricsEvent("sdk.datachannel.sub." + err.message);
+          return;
+        }
+
+        channel.on({
+          message: function(ev) {
+            // TODO: handle messages
+          }.bind(this),
+
+          close: function() {
+            // XXX We probably want to dispatch and handle this somehow.
+            console.log("Subscribed cursor data channel closed!");
+          }
+        });
+
+        this._subscriberCursorChannel = channel;
+      }.bind(this));
     },
 
     /**
@@ -752,6 +788,35 @@ loop.OTSdkDriver = (function() {
 
         this._checkDataChannelsAvailable();
       }.bind(this));
+
+      this._createCursorDataChannel();
+    },
+
+    /**
+     * Setups the cursor data channel to allow sending cursor data through the sdk
+     *
+     * We create the cursor data channel once the remote client is setup for data
+     * channels. Getting the data channel for the subscriber is handled
+     * separately when the subscription completes.
+     */
+    _createCursorDataChannel: function() {
+      // This won't work until a subscriber exists for this publisher
+      this.publisher._.getDataChannel("cursor", {}, function(err, channel) {
+        if (err) {
+          console.error(err);
+          this._notifyMetricsEvent("sdk.datachannel.pub." + err.message);
+          return;
+        }
+
+        this._publisherCursorChannel = channel;
+
+        channel.on({
+          close: function() {
+            // XXX We probably want to dispatch and handle this somehow.
+            console.log("Cursor data channel closed!");
+          }
+        });
+      }.bind(this));
     },
 
     /**
@@ -773,6 +838,20 @@ loop.OTSdkDriver = (function() {
      */
     sendTextChatMessage: function(message) {
       this._publisherChannel.send(JSON.stringify(message));
+    },
+
+    /**
+     * Sends the cursor position on the data channel.
+     *
+     * @param {String} message The message to send.
+     */
+    sendCursorMessage: function(message) {
+      if (!this._publisherCursorChannel || !this._subscriberCursorChannel) {
+        return;
+      }
+
+      message.userID = this.session.sessionId;
+      this._publisherCursorChannel.send(JSON.stringify(message));
     },
 
     /**

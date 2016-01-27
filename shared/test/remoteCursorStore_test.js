@@ -48,4 +48,26 @@ describe("loop.store.RemoteCursorStore", function() {
       sinon.assert.calledWith(loop.subscribe, "CursorPositionChange");
     });
   });
+
+  describe("#_cursorPositionChangeListener", function() {
+    it("should send cursor data through the sdk", function() {
+      var fakeEvent = {
+        deltaX: 10,
+        deltaY: 10,
+        width: 100,
+        height: 100
+      };
+
+      LoopMochaUtils.publish("CursorPositionChange", fakeEvent);
+
+      sinon.assert.calledOnce(fakeSdkDriver.sendCursorMessage);
+      sinon.assert.calledWith(fakeSdkDriver.sendCursorMessage, {
+        type: CURSOR_MESSAGE_TYPES.POSITION,
+        top: fakeEvent.deltaY,
+        left: fakeEvent.deltaX,
+        width: fakeEvent.width,
+        height: fakeEvent.height
+      });
+    });
+  });
 });
