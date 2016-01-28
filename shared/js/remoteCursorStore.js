@@ -14,7 +14,10 @@ loop.store.RemoteCursorStore = (function() {
    * A store to handle remote cursors events.
    */
   var RemoteCursorStore = loop.store.createStore({
-    actions: [],
+    actions: [
+      "receivedCursorData",
+      "videoDimensionsChanged"
+    ],
 
     /**
      * Initializes the store.
@@ -40,6 +43,7 @@ loop.store.RemoteCursorStore = (function() {
      */
     getInitialStoreState: function() {
       return {
+        realVideoSize: null,
         remoteCursorPosition: null
       };
     },
@@ -55,8 +59,45 @@ loop.store.RemoteCursorStore = (function() {
     _cursorPositionChangeListener: function(event) {
       this._sdkDriver.sendCursorMessage({
         type: CURSOR_MESSAGE_TYPES.POSITION,
-        top: event.ratioY,
-        left: event.ratioX,
+        ratioX: event.ratioX,
+        ratioY: event.ratioY
+      });
+    },
+
+    /**
+     * Receives cursor data.
+     *
+     * @param {sharedActions.receivedCursorData} actionData
+     */
+    receivedCursorData: function(actionData) {
+      switch (actionData.type) {
+        case CURSOR_MESSAGE_TYPES.POSITION:
+          // TODO: handle cursor position if it's desktop instead of standalone
+          this.setStoreState({
+            remoteCursorPosition: {
+              ratioX: actionData.ratioX,
+              ratioY: actionData.ratioY
+            }
+          });
+          break;
+      }
+    },
+
+    /**
+     * Listen to stream dimension changes.
+     *
+     * @param {sharedActions.VideoDimensionsChanged} actionData
+     */
+    videoDimensionsChanged: function(actionData) {
+      if (actionData.videoType !== "screen") {
+        return;
+      }
+
+      this.setStoreState({
+        realVideoSize: {
+          height: actionData.dimensions.height,
+          width: actionData.dimensions.width
+        }
       });
     }
   });

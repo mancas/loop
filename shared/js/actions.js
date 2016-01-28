@@ -131,6 +131,15 @@ loop.shared.actions = (function() {
     }),
 
     /**
+     * Notifies that a message has been received from the other peer.
+     */
+    ReceivedCursorData: Action.define("receivedCursorData", {
+      type: String,
+      ratioX: Number,
+      ratioY: Number
+    }),
+
+    /**
      * Used by the ongoing views to notify stores about the elements
      * required for the sdk.
      */
