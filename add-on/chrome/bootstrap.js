@@ -682,7 +682,7 @@ var WindowListener = {
 
         this.LoopAPI.broadcastPushMessage("CursorPositionChange", {
           ratioX: deltaX / browserBox.width,
-          ratioY: deltaY /browserBox.height
+          ratioY: deltaY / browserBox.height
         });
       },
 
