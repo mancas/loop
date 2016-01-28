@@ -559,7 +559,7 @@ describe("loop.shared.views", function() {
         }
       });
 
-      var element = view.getDOMNode();
+      var element = view.getDOMNode().querySelector("video");
 
       expect(element).not.eql(null);
       expect(element.className).eql("local-video");
@@ -580,12 +580,20 @@ describe("loop.shared.views", function() {
     // We test this function by itself, as otherwise we'd be into creating fake
     // streams etc.
     describe("#attachVideo", function() {
-      var fakeViewElement;
+      var fakeViewElement, fakeVideoElement;
 
       beforeEach(function() {
-        fakeViewElement = {
+        fakeVideoElement = {
           play: sinon.stub(),
-          tagName: "VIDEO"
+          tagName: "VIDEO",
+          addEventListener: function() {}
+        };
+
+        fakeViewElement = {
+          tagName: "DIV",
+          querySelector: function() {
+            return fakeVideoElement;
+          }
         };
 
         view = mountTestComponent({
@@ -605,7 +613,12 @@ describe("loop.shared.views", function() {
 
       it("should not throw if the element is not a video object", function() {
         sinon.stub(view, "getDOMNode").returns({
-          tagName: "DIV"
+          tagName: "DIV",
+          querySelector: function() {
+            return {
+              tagName: "DIV"
+            };
+          }
         });
 
         expect(function() {
@@ -614,7 +627,7 @@ describe("loop.shared.views", function() {
       });
 
       it("should attach a video object according to the standard", function() {
-        fakeViewElement.srcObject = null;
+        fakeVideoElement.srcObject = null;
 
         sinon.stub(view, "getDOMNode").returns(fakeViewElement);
 
@@ -622,11 +635,11 @@ describe("loop.shared.views", function() {
           srcObject: { fake: 1 }
         });
 
-        expect(fakeViewElement.srcObject).eql({ fake: 1 });
+        expect(fakeVideoElement.srcObject).eql({ fake: 1 });
       });
 
       it("should attach a video object for Firefox", function() {
-        fakeViewElement.mozSrcObject = null;
+        fakeVideoElement.mozSrcObject = null;
 
         sinon.stub(view, "getDOMNode").returns(fakeViewElement);
 
@@ -634,11 +647,11 @@ describe("loop.shared.views", function() {
           mozSrcObject: { fake: 2 }
         });
 
-        expect(fakeViewElement.mozSrcObject).eql({ fake: 2 });
+        expect(fakeVideoElement.mozSrcObject).eql({ fake: 2 });
       });
 
       it("should attach a video object for Chrome", function() {
-        fakeViewElement.src = null;
+        fakeVideoElement.src = null;
 
         sinon.stub(view, "getDOMNode").returns(fakeViewElement);
 
@@ -646,7 +659,41 @@ describe("loop.shared.views", function() {
           src: { fake: 2 }
         });
 
-        expect(fakeViewElement.src).eql({ fake: 2 });
+        expect(fakeVideoElement.src).eql({ fake: 2 });
+      });
+    });
+
+    describe("#handleVideoUpdate", function() {
+      var fakeLoadedDataEvent;
+
+      beforeEach(function() {
+        fakeLoadedDataEvent = {
+          target: {
+            clientWidth: 1280,
+            clientHeight: 768,
+            videoWidth: 2580,
+            videoHeight: 1536
+          }
+        };
+
+        view = mountTestComponent({
+          displayAvatar: false,
+          mediaType: "local",
+          srcMediaElement: {
+            fake: 1
+          }
+        });
+      });
+
+      it("should save the video size", function() {
+        view.handleVideoUpdate(fakeLoadedDataEvent);
+
+        expect(view.state.videoSize).eql({
+          clientWidth: fakeLoadedDataEvent.target.clientWidth,
+          clientHeight: fakeLoadedDataEvent.target.clientHeight,
+          realVideoWidth: fakeLoadedDataEvent.target.videoWidth,
+          realVideoHeight: fakeLoadedDataEvent.target.videoHeight
+        });
       });
     });
   });
@@ -779,6 +826,176 @@ describe("loop.shared.views", function() {
 
       expect(view.getDOMNode().querySelector(".media-wrapper")
         .classList.contains("showing-remote-streams")).eql(true);
+    });
+  });
+
+  describe("RemoteCursorView", function() {
+    var view;
+    var fakeVideoSize;
+    var remoteCursorStore;
+
+    function mountTestComponent(props) {
+      props = props || {};
+      return TestUtils.renderIntoDocument(
+        React.createElement(sharedViews.RemoteCursorView, props));
+    }
+
+    beforeEach(function() {
+      remoteCursorStore = new loop.store.RemoteCursorStore(dispatcher, {
+        sdkDriver: {}
+      });
+
+      loop.store.StoreMixin.register({ remoteCursorStore: remoteCursorStore });
+
+      remoteCursorStore.setStoreState({
+        remoteCursorPosition: {
+          top: 0,
+          left: 0
+        }
+      });
+    });
+
+    it("should reduce video width", function() {
+      fakeVideoSize = {
+        clientWidth: 1280,
+        clientHeight: 768,
+        realVideoWidth: 2580,
+        realVideoHeight: 1536
+      };
+      view = mountTestComponent({
+        videoSize: fakeVideoSize
+      });
+
+      view._calculateVideoLetterboxing();
+      var clientWidth = fakeVideoSize.clientWidth;
+      var clientHeight = fakeVideoSize.clientHeight;
+
+      var realVideoWidth = fakeVideoSize.realVideoWidth;
+      var realVideoHeight = fakeVideoSize.realVideoHeight;
+
+      var streamVideoWidth = clientWidth;
+      var streamVideoHeight = (realVideoHeight * clientWidth) / realVideoWidth;
+
+      expect(view.state.videoLetterboxing).eql({
+        left: (clientWidth - streamVideoWidth) / 2,
+        top: (clientHeight - streamVideoHeight) / 2
+      });
+    });
+
+    it("should reduce video width and height", function() {
+      fakeVideoSize = {
+        clientWidth: 1280,
+        clientHeight: 768,
+        realVideoWidth: 2580,
+        realVideoHeight: 2580
+      };
+      view = mountTestComponent({
+        videoSize: fakeVideoSize
+      });
+
+      view._calculateVideoLetterboxing();
+      var clientWidth = fakeVideoSize.clientWidth;
+      var clientHeight = fakeVideoSize.clientHeight;
+
+      var realVideoWidth = fakeVideoSize.realVideoWidth;
+      var realVideoHeight = fakeVideoSize.realVideoHeight;
+
+      var streamVideoWidth = (realVideoWidth * clientHeight) / realVideoHeight;
+      var streamVideoHeight = clientHeight;
+
+      expect(view.state.videoLetterboxing).eql({
+        left: (clientWidth - streamVideoWidth) / 2,
+        top: (clientHeight - streamVideoHeight) / 2
+      });
+    });
+
+    it("should adjust video height when video width fits in the screen", function() {
+      fakeVideoSize = {
+        clientWidth: 1280,
+        clientHeight: 768,
+        realVideoWidth: 1200,
+        realVideoHeight: 2580
+      };
+      view = mountTestComponent({
+        videoSize: fakeVideoSize
+      });
+
+      view._calculateVideoLetterboxing();
+      var clientWidth = fakeVideoSize.clientWidth;
+      var clientHeight = fakeVideoSize.clientHeight;
+
+      var realVideoWidth = fakeVideoSize.realVideoWidth;
+      var realVideoHeight = fakeVideoSize.realVideoHeight;
+
+      var streamVideoWidth = (realVideoWidth * clientHeight) / realVideoHeight;
+      var streamVideoHeight = clientHeight;
+
+      expect(view.state.videoLetterboxing).eql({
+        left: (clientWidth - streamVideoWidth) / 2,
+        top: (clientHeight - streamVideoHeight) / 2
+      });
+    });
+
+    it("should not adjust video size", function() {
+      fakeVideoSize = {
+        clientWidth: 1280,
+        clientHeight: 768,
+        realVideoWidth: 1200,
+        realVideoHeight: 700
+      };
+      view = mountTestComponent({
+        videoSize: fakeVideoSize
+      });
+
+      view._calculateVideoLetterboxing();
+      var clientWidth = fakeVideoSize.clientWidth;
+      var clientHeight = fakeVideoSize.clientHeight;
+
+      var realVideoWidth = fakeVideoSize.realVideoWidth;
+      var realVideoHeight = fakeVideoSize.realVideoHeight;
+
+      var streamVideoWidth = realVideoWidth;
+      var streamVideoHeight = realVideoHeight;
+
+      expect(view.state.videoLetterboxing).eql({
+        left: (clientWidth - streamVideoWidth) / 2,
+        top: (clientHeight - streamVideoHeight) / 2
+      });
+    });
+
+    describe("#calculateCursorPosition", function() {
+      beforeEach(function() {
+        remoteCursorStore.setStoreState({
+          remoteCursorPosition: {
+            top: 10,
+            left: 10
+          }
+        });
+      });
+
+      it("should calculate the cursor position coords in the stream video", function() {
+        fakeVideoSize = {
+          clientWidth: 1280,
+          clientHeight: 768,
+          realVideoWidth: 2580,
+          realVideoHeight: 2580
+        };
+        view = mountTestComponent({
+          videoSize: fakeVideoSize
+        });
+        view._calculateVideoLetterboxing();
+        view.setState({
+          remoteCursorPosition: remoteCursorStore._storeState.remoteCursorPosition
+        });
+
+        var cursorPositionX = (view.state.streamVideoWidth * view.state.remoteCursorPosition.left) / 100;
+        var cursorPositionY = (view.state.streamVideoHeight * view.state.remoteCursorPosition.top) / 100;
+
+        expect(view.calculateCursorPosition()).eql({
+          left: cursorPositionX + view.state.videoLetterboxing.left,
+          top: cursorPositionY + view.state.videoLetterboxing.top
+        });
+      });
     });
   });
 });

@@ -742,6 +742,7 @@ loop.OTSdkDriver = (function() {
         channel.on({
           message: function(ev) {
             var message = JSON.parse(ev.data);
+            console.info(message);
             switch (message.type) {
               case CURSOR_MESSAGE_TYPES.POSITION:
                 this.dispatcher.dispatch(
@@ -853,6 +854,7 @@ loop.OTSdkDriver = (function() {
      * @param {String} message The message to send.
      */
     sendCursorMessage: function(message) {
+      console.info(message, this._publisherCursorChannel, this._subscriberCursorChannel);
       if (!this._publisherCursorChannel || !this._subscriberCursorChannel) {
         return;
       }

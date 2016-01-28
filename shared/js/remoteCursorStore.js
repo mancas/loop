@@ -42,7 +42,8 @@ loop.store.RemoteCursorStore = (function() {
      */
     getInitialStoreState: function() {
       return {
-        remoteCursorPosition: null
+        remoteCursorPosition: null,
+        realVideoSize: null
       };
     },
 
@@ -72,13 +73,16 @@ loop.store.RemoteCursorStore = (function() {
      * @param {sharedActions.receivedCursorData} actionData
      */
     receivedCursorData: function(actionData) {
+      console.info(actionData);
       switch (actionData.type) {
         case CURSOR_MESSAGE_TYPES.POSITION:
           // TODO: handle cursor position if it's desktop instead of standalone
           this.setStoreState({
             remoteCursorPosition: {
               top: actionData.top,
-              left: actionData.left,
+              left: actionData.left
+            },
+            realVideoSize: {
               width: actionData.width,
               height: actionData.height
             }

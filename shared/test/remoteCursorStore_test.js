@@ -6,22 +6,21 @@ describe("loop.store.RemoteCursorStore", function() {
 
   var expect = chai.expect;
   var sharedActions = loop.shared.actions;
-  var sharedUtils = loop.shared.utils;
   var CURSOR_MESSAGE_TYPES = loop.shared.utils.CURSOR_MESSAGE_TYPES;
-  var sandbox, dispatcher, store, fakeSdkDriver, requestStubs;
+  var sandbox, dispatcher, store, fakeSdkDriver;
 
   beforeEach(function() {
     sandbox = LoopMochaUtils.createSandbox();
 
-    LoopMochaUtils.stubLoopRequest(requestStubs = {
-      GetLoopPref: sinon.stub(),
+    LoopMochaUtils.stubLoopRequest({
+      GetLoopPref: sinon.stub()
     });
 
     dispatcher = new loop.Dispatcher();
     sandbox.stub(dispatcher, "dispatch");
 
     fakeSdkDriver = {
-      sendCursorMessage: sinon.stub(),
+      sendCursorMessage: sinon.stub()
     };
 
     store = new loop.store.RemoteCursorStore(dispatcher, {
@@ -43,7 +42,7 @@ describe("loop.store.RemoteCursorStore", function() {
 
     it("should add a CursorPositionChange event listener", function() {
       sandbox.stub(loop, "subscribe");
-      new loop.store.RemoteCursorStore(dispatcher, {sdkDriver: fakeSdkDriver});
+      new loop.store.RemoteCursorStore(dispatcher, { sdkDriver: fakeSdkDriver });
       sinon.assert.calledOnce(loop.subscribe);
       sinon.assert.calledWith(loop.subscribe, "CursorPositionChange");
     });
@@ -83,7 +82,9 @@ describe("loop.store.RemoteCursorStore", function() {
 
       expect(store.getStoreState().remoteCursorPosition).eql({
         top: 10,
-        left: 10,
+        left: 10
+      });
+      expect(store.getStoreState().realVideoSize).eql({
         width: 100,
         height: 100
       });
