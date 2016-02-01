@@ -36,6 +36,7 @@ loop.store.RemoteCursorStore = (function() {
 
       this._sdkDriver = options.sdkDriver;
       loop.subscribe("CursorPositionChange", this._cursorPositionChangeListener.bind(this));
+      loop.subscribe("CursorClick", this._cursorClickListener.bind(this));
     },
 
     /**
@@ -44,6 +45,7 @@ loop.store.RemoteCursorStore = (function() {
     getInitialStoreState: function() {
       return {
         realVideoSize: null,
+        remoteCursorClick: null,
         remoteCursorPosition: null
       };
     },
@@ -51,7 +53,7 @@ loop.store.RemoteCursorStore = (function() {
     /**
      * Sends cursor position through the sdk.
      *
-     * @param {Object} event An object containing the cursor position and stream dimensions
+     * @param {Object} event An object containing the cursor position
      *                       It should contains:
      *                       - ratioX: Left position. Number between 0 and 1.
      *                       - ratioY: Top position. Number between 0 and 1.
@@ -61,6 +63,15 @@ loop.store.RemoteCursorStore = (function() {
         ratioX: event.ratioX,
         ratioY: event.ratioY,
         type: CURSOR_MESSAGE_TYPES.POSITION
+      });
+    },
+
+    /**
+     * Sends cursor click position through the sdk.       
+     */
+    _cursorClickListener: function() {
+      this._sdkDriver.sendCursorMessage({
+        type: CURSOR_MESSAGE_TYPES.CLICK
       });
     },
 
@@ -78,6 +89,11 @@ loop.store.RemoteCursorStore = (function() {
               ratioX: actionData.ratioX,
               ratioY: actionData.ratioY
             }
+          });
+          break;
+        case CURSOR_MESSAGE_TYPES.CLICK:
+          this.setStoreState({
+            remoteCursorClick: true
           });
           break;
       }

@@ -134,8 +134,8 @@ loop.shared.actions = (function() {
      * Notifies that cursor data has been received from the other peer.
      */
     ReceivedCursorData: Action.define("receivedCursorData", {
-      ratioX: Number,
-      ratioY: Number,
+      // ratioX: Number (optional)
+      // ratioY: Number (optional)
       type: String
     }),
 
