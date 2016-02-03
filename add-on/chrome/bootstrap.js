@@ -75,6 +75,22 @@ var WindowListener = {
       },
 
       /**
+       * @return {Object} Getter for the Loop constants
+       */
+      get constants() {
+        if (!this._constants) {
+          // GetAllConstants is synchronous even though it's using a callback
+          this.LoopAPI.sendMessageToHandler({
+            name: "GetAllConstants"
+          }, result => {
+            this._constants = result;
+          });
+        }
+
+        return this._constants;
+      },
+
+      /**
        * @return {Promise}
        */
       promiseDocumentVisible(aDocument) {
@@ -539,6 +555,15 @@ var WindowListener = {
               buttonNode.label = stringObj.label;
               buttonNode.accessKey = stringObj.accesskey;
               LoopUI.MozLoopService.toggleBrowserSharing(this._browserSharePaused);
+
+              let buckets = this.constants.SHARING_SCREEN;
+              this.LoopAPI.sendMessageToHandler({
+                name: "TelemetryAddValue",
+                data: [
+                  "LOOP_INFOBAR_ACTION_BUTTONS",
+                  this._browserSharePaused ? buckets.PAUSED : buckets.RESUMED
+                ]
+              });
               return true;
             },
             type: "pause"
