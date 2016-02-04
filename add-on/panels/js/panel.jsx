@@ -6,10 +6,11 @@ var loop = loop || {};
 loop.panel = (function(_, mozL10n) {
   "use strict";
 
-  var sharedViews = loop.shared.views;
-  var sharedModels = loop.shared.models;
-  var sharedMixins = loop.shared.mixins;
   var sharedActions = loop.shared.actions;
+  var sharedMixins = loop.shared.mixins;
+  var sharedModels = loop.shared.models;
+  var sharedUtils = loop.shared.utils;
+  var sharedViews = loop.shared.views;
   var Button = sharedViews.Button;
 
   var FTU_VERSION = 1;
@@ -694,7 +695,7 @@ loop.panel = (function(_, mozL10n) {
       // the room.
       if (this.state.pendingCreation &&
           !nextState.pendingCreation && !nextState.error) {
-        this.closeWindow();
+        //this.closeWindow();
       }
     },
 
@@ -895,6 +896,152 @@ loop.panel = (function(_, mozL10n) {
     }
   });
 
+  var SharePanelView = React.createClass({
+    statics: {
+      TRIGGERED_RESET_DELAY: 2000
+    },
+
+    mixins: [
+      Backbone.Events,
+      sharedMixins.DocumentVisibilityMixin,
+      sharedMixins.WindowCloseMixin
+    ],
+
+    propTypes: {
+      dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
+      roomStore: React.PropTypes.instanceOf(loop.store.RoomStore).isRequired
+    },
+
+    getInitialState: function() {
+      return {
+        shouldOpenSharePanel: false
+      };
+    },
+
+    componentDidMount: function() {
+      this.listenTo(this.props.roomStore, "change", this._onStoreStateChanged);
+    },
+
+    componentWillUnmount: function() {
+      this.stopListening(this.props.roomStore);
+    },
+
+    _onStoreStateChanged: function() {
+      this.setState({
+        shouldOpenSharePanel: this.props.roomStore.getStoreState("shouldOpenSharePanel")
+      });
+    },
+
+    onDocumentHidden: function() {
+      this._closeSharePanel();
+    },
+
+    _closeSharePanel: function() {
+      this.props.roomStore.setStoreState({
+        shouldOpenSharePanel: false
+      });
+
+      this.openRoom();
+    },
+
+    openRoom: function() {
+      var activeRoom = this.props.roomStore.getStoreState("activeRoom");
+      this.props.dispatcher.dispatch(new sharedActions.OpenRoom({
+        roomToken: activeRoom.roomToken
+      }));
+
+      this.closeWindow();
+    },
+
+    handleEmailButtonClick: function(event) {
+      event.preventDefault();
+
+      var activeRoom = this.props.roomStore.getStoreState("activeRoom");
+      var contextURL = activeRoom.decryptedContext.urls && activeRoom.decryptedContext.urls[0];
+      if (contextURL) {
+        if (contextURL.location === null) {
+          contextURL = undefined;
+        } else {
+          contextURL = sharedUtils.formatURL(contextURL.location).hostname;
+        }
+      }
+
+      this.props.dispatcher.dispatch(
+        new sharedActions.EmailRoomUrl({
+          roomUrl: activeRoom.roomUrl,
+          roomDescription: contextURL,
+          from: "panel"
+        }));
+
+      this._closeSharePanel();
+    },
+
+    handleFacebookButtonClick: function(event) {
+      event.preventDefault();
+
+      var activeRoom = this.props.roomStore.getStoreState("activeRoom");
+      this.props.dispatcher.dispatch(new sharedActions.FacebookShareRoomUrl({
+        from: "panel",
+        roomUrl: activeRoom.roomUrl
+      }));
+
+      this._closeSharePanel();
+    },
+
+    handleCopyButtonClick: function(event) {
+      event.preventDefault();
+
+      var activeRoom = this.props.roomStore.getStoreState("activeRoom");
+      this.props.dispatcher.dispatch(new sharedActions.CopyRoomUrl({
+        roomUrl: activeRoom.roomUrl,
+        from: "panel"
+      }));
+
+      this.setState({ copiedUrl: true });
+      setTimeout(this.resetTriggeredButtons, this.constructor.TRIGGERED_RESET_DELAY);
+    },
+
+    /**
+     * Reset state of triggered buttons if necessary
+     */
+    resetTriggeredButtons: function() {
+      if (this.state.copiedUrl) {
+        this.setState({ copiedUrl: false });
+        this._closeSharePanel();
+      }
+    },
+
+    render: function() {
+      var sharePanelClasses = classNames({
+        "share-panel-container": true,
+        "share-panel-open": this.state.shouldOpenSharePanel
+      });
+      var activeRoom = this.props.roomStore.getStoreState("activeRoom");
+      return (
+        <div className={sharePanelClasses}>
+          <div className="share-panel-overlay" onClick={this._closeSharePanel} />
+          <div className="share-panel-content">
+            <h2>Invite a friend to join you!</h2>
+            <p>
+              It takes two people to use Firefox Hello, so send a friend a link to browse the web with you!
+            </p>
+
+            <div className="share-panel-link">
+              <span>Your link:</span>
+              <input type="text" value={activeRoom.roomUrl} />
+              <button className="btn btn-info" onClick={this.handleCopyButtonClick}>{this.state.copiedUrl ? "Link copied!" : "Copy link"}</button>
+            </div>
+
+            <div className="share-panel-social-links">
+              <button className="btn btn-info email-btn" onClick={this.handleEmailButtonClick}>Email Link</button>
+              <button className="btn btn-info fb-btn" onClick={this.handleFacebookButtonClick}>Facebook</button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+  });
+
   /**
    * Panel view.
    */
@@ -1043,14 +1190,19 @@ loop.panel = (function(_, mozL10n) {
           <NotificationListView
             clearOnDocumentHidden={true}
             notifications={this.props.notifications} />
+          <div className="panel-container">
             <RoomList dispatcher={this.props.dispatcher}
               store={this.props.roomStore} />
-          <div className="footer">
-              <AccountLink fxAEnabled={this.state.fxAEnabled}
-                           userProfile={this.props.userProfile || this.state.userProfile}/>
-            <div className="signin-details">
-              <SettingsDropdown />
+            <div className="footer">
+                <AccountLink fxAEnabled={this.state.fxAEnabled}
+                             userProfile={this.props.userProfile || this.state.userProfile}/>
+              <div className="signin-details">
+                <SettingsDropdown />
+              </div>
             </div>
+            <SharePanelView
+              dispatcher={this.props.dispatcher}
+              roomStore={this.props.roomStore} />
           </div>
         </div>
       );
