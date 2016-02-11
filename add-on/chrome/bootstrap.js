@@ -557,12 +557,35 @@ var WindowListener = {
               LoopUI.MozLoopService.toggleBrowserSharing(this._browserSharePaused);
 
               let buckets = this.constants.SHARING_SCREEN;
+              let pref = ".sessionToken";
+              if (this._browserSharePaused) {
+                pref = "telemetryPaused" + pref;
+              } else {
+                pref = "telemetryResumed" + pref;
+              }
               this.LoopAPI.sendMessageToHandler({
-                name: "TelemetryAddValue",
-                data: [
-                  "LOOP_INFOBAR_ACTION_BUTTONS",
-                  this._browserSharePaused ? buckets.PAUSED : buckets.RESUMED
-                ]
+                name: "GetLoopPref",
+                data: [pref]
+              }, result => {
+                if (result === this.MozLoopService.sessionToken) {
+                  return;
+                }
+
+                this.LoopAPI.sendMessageToHandler({
+                  name: "TelemetryAddValue",
+                  data: [
+                    "LOOP_INFOBAR_ACTION_BUTTONS",
+                    this._browserSharePaused ? buckets.PAUSED : buckets.RESUMED
+                  ]
+                }, () => {
+                  this.LoopAPI.sendMessageToHandler({
+                    name: "SetLoopPref",
+                    data: [
+                      pref,
+                      this.MozLoopService.sessionToken
+                    ]
+                  });
+                });
               });
               return true;
             },

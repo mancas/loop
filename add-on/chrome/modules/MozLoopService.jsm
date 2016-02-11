@@ -1304,6 +1304,7 @@ this.MozLoopService = {
       // Don't alert if we're in the doNotDisturb mode, or the participant
       // is the owner - the content code deals with the rest of the sounds.
       if (MozLoopServiceInternal.doNotDisturb || participant.owner) {
+        this._sessionToken  = room.sessionToken;
         return;
       }
 
@@ -1982,5 +1983,12 @@ this.MozLoopService = {
    */
   get screenShareActive() {
     return this._activeScreenShares.size > 0;
+  },
+
+  /**
+   * Returns the current sessionToken
+   */
+  get sessionToken() {
+    return this._sessionToken;
   }
 };
