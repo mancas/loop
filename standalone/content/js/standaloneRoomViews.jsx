@@ -576,9 +576,7 @@ loop.standaloneRoomViews = (function(mozL10n) {
         case ROOM_STATES.INIT:
         case ROOM_STATES.GATHER:
           return (
-            <div className="context-info">
-              <ToSView dispatcher={this.props.dispatcher} />
-            </div>
+            <ToSView dispatcher={this.props.dispatcher} />
           );
         case ROOM_STATES.MEDIA_WAIT:
         case ROOM_STATES.JOINING:

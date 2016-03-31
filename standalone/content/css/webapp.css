@@ -251,11 +251,14 @@ html[dir="rtl"] .standalone-info-bar-spacer {
   font-size: 12px;
 }
 
-.standalone-info-bar-spacer > .context-info > .terms-service {
+.standalone-info-bar-spacer > .terms-service {
+  color: #666;
+  font-size: 12px;
   margin: 0;
+  text-align: left;
 }
 
-.standalone-info-bar-spacer > .context-info > .terms-service > a {
+.standalone-info-bar-spacer > .terms-service > a {
   color: #666;
 }
 
