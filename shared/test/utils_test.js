@@ -352,14 +352,6 @@ describe("loop.shared.utils", function() {
         }
       });
       LoopMochaUtils.stubLoopRequest(requestStubs = {
-        GetAllConstants: function() {
-          return {
-            SHARING_ROOM_URL: {
-              EMAIL_FROM_CALLFAILED: 2,
-              EMAIL_FROM_CONVERSATION: 3
-            }
-          };
-        },
         GetLoopPref: sinon.stub(),
         ComposeEmail: sinon.stub()
       });

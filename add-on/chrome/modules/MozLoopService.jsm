@@ -26,20 +26,6 @@ const TWO_WAY_MEDIA_CONN_LENGTH = {
 };
 
 /**
- * Values that we segment sharing a room URL action telemetry probes into.
- *
- * @type {{COPY_FROM_PANEL: Number, COPY_FROM_CONVERSATION: Number,
- *   EMAIL_FROM_CALLFAILED: Number, EMAIL_FROM_CONVERSATION: Number}}
- */
-const SHARING_ROOM_URL = {
-  COPY_FROM_PANEL: 0,
-  COPY_FROM_CONVERSATION: 1,
-  EMAIL_FROM_CALLFAILED: 2,
-  EMAIL_FROM_CONVERSATION: 3,
-  FACEBOOK_FROM_CONVERSATION: 4
-};
-
-/**
  * Values that we segment room create action telemetry probes into.
  *
  * @type {{CREATE_SUCCESS: Number, CREATE_FAIL: Number}}
@@ -106,12 +92,10 @@ Cu.import("resource://gre/modules/FxAccountsOAuthClient.jsm");
 Cu.importGlobalProperties(["URL"]);
 
 this.EXPORTED_SYMBOLS = ["MozLoopService", "LOOP_SESSION_TYPE", "LOOP_MAU_TYPE",
-  "TWO_WAY_MEDIA_CONN_LENGTH", "SHARING_ROOM_URL", "SHARING_SCREEN",
-  "ROOM_CREATE", "ROOM_DELETE"];
+  "TWO_WAY_MEDIA_CONN_LENGTH", "SHARING_SCREEN", "ROOM_CREATE", "ROOM_DELETE"];
 
 XPCOMUtils.defineConstant(this, "LOOP_SESSION_TYPE", LOOP_SESSION_TYPE);
 XPCOMUtils.defineConstant(this, "TWO_WAY_MEDIA_CONN_LENGTH", TWO_WAY_MEDIA_CONN_LENGTH);
-XPCOMUtils.defineConstant(this, "SHARING_ROOM_URL", SHARING_ROOM_URL);
 XPCOMUtils.defineConstant(this, "SHARING_SCREEN", SHARING_SCREEN);
 XPCOMUtils.defineConstant(this, "ROOM_CREATE", ROOM_CREATE);
 XPCOMUtils.defineConstant(this, "ROOM_DELETE", ROOM_DELETE);

@@ -65,36 +65,6 @@ add_task(function* test_mozLoop_telemetryAdd_buckets() {
   is(snapshot.counts[CONN_LENGTH.MORE_THAN_5M], 4, "TWO_WAY_MEDIA_CONN_LENGTH.MORE_THAN_5M");
 });
 
-add_task(function* test_mozLoop_telemetryAdd_sharingURL_buckets() {
-  let histogramId = "LOOP_SHARING_ROOM_URL";
-  let histogram = Services.telemetry.getHistogramById(histogramId);
-  const SHARING_TYPES = gConstants.SHARING_ROOM_URL;
-
-  histogram.clear();
-  for (let value of [SHARING_TYPES.COPY_FROM_PANEL,
-                     SHARING_TYPES.COPY_FROM_CONVERSATION,
-                     SHARING_TYPES.COPY_FROM_CONVERSATION,
-                     SHARING_TYPES.EMAIL_FROM_CALLFAILED,
-                     SHARING_TYPES.EMAIL_FROM_CALLFAILED,
-                     SHARING_TYPES.EMAIL_FROM_CALLFAILED,
-                     SHARING_TYPES.EMAIL_FROM_CONVERSATION,
-                     SHARING_TYPES.EMAIL_FROM_CONVERSATION,
-                     SHARING_TYPES.EMAIL_FROM_CONVERSATION,
-                     SHARING_TYPES.EMAIL_FROM_CONVERSATION]) {
-    gHandlers.TelemetryAddValue({ data: [histogramId, value] }, () => {});
-  }
-
-  let snapshot = histogram.snapshot();
-  Assert.strictEqual(snapshot.counts[SHARING_TYPES.COPY_FROM_PANEL], 1,
-    "SHARING_ROOM_URL.COPY_FROM_PANEL");
-  Assert.strictEqual(snapshot.counts[SHARING_TYPES.COPY_FROM_CONVERSATION], 2,
-    "SHARING_ROOM_URL.COPY_FROM_CONVERSATION");
-  Assert.strictEqual(snapshot.counts[SHARING_TYPES.EMAIL_FROM_CALLFAILED], 3,
-    "SHARING_ROOM_URL.EMAIL_FROM_CALLFAILED");
-  Assert.strictEqual(snapshot.counts[SHARING_TYPES.EMAIL_FROM_CONVERSATION], 4,
-    "SHARING_ROOM_URL.EMAIL_FROM_CONVERSATION");
-});
-
 add_task(function* test_mozLoop_telemetryAdd_roomCreate_buckets() {
   let histogramId = "LOOP_ROOM_CREATE";
   let histogram = Services.telemetry.getHistogramById(histogramId);

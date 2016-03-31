@@ -39,7 +39,6 @@ describe("loop.shared.desktopViews", function() {
     function mountTestComponent(props) {
       props = _.extend({
         dispatcher: dispatcher,
-        locationForMetrics: "conversation",
         roomData: {
           roomUrl: "http://invalid",
           roomContextUrls: [{
@@ -62,8 +61,7 @@ describe("loop.shared.desktopViews", function() {
 
       sinon.assert.calledOnce(dispatcher.dispatch);
       sinon.assert.calledWith(dispatcher.dispatch, new sharedActions.CopyRoomUrl({
-        roomUrl: "http://invalid",
-        from: "conversation"
+        roomUrl: "http://invalid"
       }));
     });
 
@@ -109,7 +107,6 @@ describe("loop.shared.desktopViews", function() {
     function mountTestComponent(props) {
       props = _.extend({
         dispatcher: dispatcher,
-        locationForMetrics: "conversation",
         roomData: {
           roomUrl: "http://invalid",
           roomContextUrls: []
@@ -134,8 +131,7 @@ describe("loop.shared.desktopViews", function() {
         sinon.assert.calledWith(dispatcher.dispatch,
           new sharedActions.EmailRoomUrl({
             roomUrl: "http://invalid",
-            roomDescription: undefined,
-            from: "conversation"
+            roomDescription: undefined
           }));
       });
 
@@ -156,8 +152,7 @@ describe("loop.shared.desktopViews", function() {
         sinon.assert.calledWith(dispatcher.dispatch,
           new sharedActions.EmailRoomUrl({
             roomUrl: "http://invalid",
-            roomDescription: "www.mozilla.com",
-            from: "conversation"
+            roomDescription: "www.mozilla.com"
           }));
       });
 
@@ -179,7 +174,6 @@ describe("loop.shared.desktopViews", function() {
     function mountTestComponent(props) {
       props = _.extend({
         dispatcher: dispatcher,
-        locationForMetrics: "conversation",
         roomData: {
           roomUrl: "http://invalid",
           roomContextUrls: []
@@ -200,7 +194,6 @@ describe("loop.shared.desktopViews", function() {
         sinon.assert.calledOnce(dispatcher.dispatch);
         sinon.assert.calledWith(dispatcher.dispatch,
           new sharedActions.FacebookShareRoomUrl({
-            from: "conversation",
             roomUrl: "http://invalid"
           }));
     });
@@ -224,7 +217,6 @@ describe("loop.shared.desktopViews", function() {
       props = _.extend({
         dispatcher: dispatcher,
         facebookEnabled: false,
-        locationForMetrics: "conversation",
         roomData: { roomUrl: "http://invalid" },
         savingContext: false,
         show: true,

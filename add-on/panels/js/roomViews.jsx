@@ -370,7 +370,6 @@ loop.roomViews = (function(mozL10n) {
                   dispatcher={this.props.dispatcher}
                   error={this.state.error}
                   facebookEnabled={this.props.facebookEnabled}
-                  locationForMetrics="conversation"
                   roomData={roomData}
                   show={shouldRenderInvitationOverlay}
                   socialShareProviders={this.state.socialShareProviders} />

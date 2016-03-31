@@ -29,13 +29,6 @@ describe("loop.store.RoomStore", function() {
     LoopMochaUtils.stubLoopRequest(requestStubs = {
       GetAllConstants: function() {
         return {
-          SHARING_ROOM_URL: {
-            COPY_FROM_PANEL: 0,
-            COPY_FROM_CONVERSATION: 1,
-            EMAIL_FROM_PANEL: 2,
-            EMAIL_FROM_CONVERSATION: 3,
-            FACEBOOK_FROM_CONVERSATION: 4
-          },
           ROOM_CREATE: {
             CREATE_SUCCESS: 0,
             CREATE_FAIL: 1
@@ -485,34 +478,11 @@ describe("loop.store.RoomStore", function() {
     describe("#copyRoomUrl", function() {
       it("should copy the room URL", function() {
         store.copyRoomUrl(new sharedActions.CopyRoomUrl({
-          roomUrl: "http://invalid",
-          from: "conversation"
+          roomUrl: "http://invalid"
         }));
 
         sinon.assert.calledOnce(requestStubs.CopyString);
         sinon.assert.calledWithExactly(requestStubs.CopyString, "http://invalid");
-      });
-
-      it("should send a telemetry event for copy from panel", function() {
-        store.copyRoomUrl(new sharedActions.CopyRoomUrl({
-          roomUrl: "http://invalid",
-          from: "panel"
-        }));
-
-        sinon.assert.calledTwice(requestStubs.TelemetryAddValue);
-        sinon.assert.calledWithExactly(requestStubs.TelemetryAddValue.getCall(0),
-          "LOOP_SHARING_ROOM_URL", 0);
-      });
-
-      it("should send a telemetry event for copy from conversation", function() {
-        store.copyRoomUrl(new sharedActions.CopyRoomUrl({
-          roomUrl: "http://invalid",
-          from: "conversation"
-        }));
-
-        sinon.assert.calledTwice(requestStubs.TelemetryAddValue);
-        sinon.assert.calledWithExactly(requestStubs.TelemetryAddValue.getCall(0),
-          "LOOP_SHARING_ROOM_URL", 1);
       });
     });
 
@@ -521,8 +491,7 @@ describe("loop.store.RoomStore", function() {
         sandbox.stub(sharedUtils, "composeCallUrlEmail");
 
         store.emailRoomUrl(new sharedActions.EmailRoomUrl({
-          roomUrl: "http://invalid",
-          from: "conversation"
+          roomUrl: "http://invalid"
         }));
 
         sinon.assert.calledOnce(sharedUtils.composeCallUrlEmail);
@@ -537,8 +506,7 @@ describe("loop.store.RoomStore", function() {
         var description = "Hello, is it me you're looking for?";
         store.emailRoomUrl(new sharedActions.EmailRoomUrl({
           roomUrl: url,
-          roomDescription: description,
-          from: "conversation"
+          roomDescription: description
         }));
 
         sinon.assert.calledOnce(sharedUtils.composeCallUrlEmail);
@@ -573,7 +541,6 @@ describe("loop.store.RoomStore", function() {
             origin = "origin.url";
 
         store.facebookShareRoomUrl(new sharedActions.FacebookShareRoomUrl({
-          from: "conversation",
           originUrl: origin,
           roomUrl: room
         }));
@@ -588,7 +555,6 @@ describe("loop.store.RoomStore", function() {
         var room = "invalid.room";
 
         store.facebookShareRoomUrl(new sharedActions.FacebookShareRoomUrl({
-          from: "conversation",
           roomUrl: room
         }));
 
@@ -597,18 +563,6 @@ describe("loop.store.RoomStore", function() {
         sinon.assert.calledWithMatch(requestStubs.OpenURL, room);
         sinon.assert.calledWithMatch(requestStubs.OpenURL, fallback);
       });
-
-      it("should send a telemetry event for facebook share from conversation", function() {
-        store.facebookShareRoomUrl(new sharedActions.FacebookShareRoomUrl({
-          from: "conversation",
-          roomUrl: "http://invalid"
-        }));
-
-        sinon.assert.calledTwice(requestStubs.TelemetryAddValue);
-        sinon.assert.calledWithExactly(requestStubs.TelemetryAddValue.getCall(0),
-          "LOOP_SHARING_ROOM_URL", 4);
-      });
-
     });
 
     describe("#shareRoomUrl", function() {
@@ -970,34 +924,31 @@ describe("loop.store.RoomStore", function() {
 
     it("should log telemetry event when sharing a room (copy link)", function() {
       store.copyRoomUrl(new sharedActions.CopyRoomUrl({
-        roomUrl: "http://invalid",
-        from: "conversation"
+        roomUrl: "http://invalid"
       }));
 
-      sinon.assert.calledTwice(requestStubs["TelemetryAddValue"]);
-      sinon.assert.calledWithExactly(requestStubs["TelemetryAddValue"].getCall(1),
+      sinon.assert.calledOnce(requestStubs["TelemetryAddValue"]);
+      sinon.assert.calledWithExactly(requestStubs["TelemetryAddValue"],
         "LOOP_ACTIVITY_COUNTER", store._constants.LOOP_MAU_TYPE.ROOM_SHARE);
     });
 
     it("should log telemetry event when sharing a room (email)", function() {
       store.emailRoomUrl(new sharedActions.EmailRoomUrl({
-        roomUrl: "http://invalid",
-        from: "conversation"
+        roomUrl: "http://invalid"
       }));
 
-      sinon.assert.calledTwice(requestStubs["TelemetryAddValue"]);
-      sinon.assert.calledWithExactly(requestStubs["TelemetryAddValue"].getCall(1),
+      sinon.assert.calledOnce(requestStubs["TelemetryAddValue"]);
+      sinon.assert.calledWithExactly(requestStubs["TelemetryAddValue"],
         "LOOP_ACTIVITY_COUNTER", store._constants.LOOP_MAU_TYPE.ROOM_SHARE);
     });
 
     it("should log telemetry event when sharing a room (facebook)", function() {
       store.facebookShareRoomUrl(new sharedActions.FacebookShareRoomUrl({
-        roomUrl: "http://invalid",
-        from: "conversation"
+        roomUrl: "http://invalid"
       }));
 
-      sinon.assert.calledTwice(requestStubs["TelemetryAddValue"]);
-      sinon.assert.calledWithExactly(requestStubs["TelemetryAddValue"].getCall(1),
+      sinon.assert.calledOnce(requestStubs["TelemetryAddValue"]);
+      sinon.assert.calledWithExactly(requestStubs["TelemetryAddValue"],
         "LOOP_ACTIVITY_COUNTER", store._constants.LOOP_MAU_TYPE.ROOM_SHARE);
     });
 

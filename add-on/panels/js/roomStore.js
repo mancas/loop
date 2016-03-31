@@ -318,18 +318,8 @@ loop.store = loop.store || {};
     copyRoomUrl: function(actionData) {
       loop.requestMulti(
         ["CopyString", actionData.roomUrl],
-        ["NotifyUITour", "Loop:RoomURLCopied"]);
-
-      var from = actionData.from;
-      var bucket = this._constants.SHARING_ROOM_URL["COPY_FROM_" + from.toUpperCase()];
-      if (typeof bucket === "undefined") {
-        console.error("No URL sharing type bucket found for '" + from + "'");
-        return;
-      }
-      loop.requestMulti(
-        ["TelemetryAddValue", "LOOP_SHARING_ROOM_URL", bucket],
-        ["TelemetryAddValue", "LOOP_ACTIVITY_COUNTER", this._constants.LOOP_MAU_TYPE.ROOM_SHARE]
-      );
+        ["NotifyUITour", "Loop:RoomURLCopied"],
+        ["TelemetryAddValue", "LOOP_ACTIVITY_COUNTER", this._constants.LOOP_MAU_TYPE.ROOM_SHARE]);
     },
 
     /**
@@ -338,20 +328,10 @@ loop.store = loop.store || {};
      * @param  {sharedActions.EmailRoomUrl} actionData The action data.
      */
     emailRoomUrl: function(actionData) {
-      var from = actionData.from;
       loop.shared.utils.composeCallUrlEmail(actionData.roomUrl, null,
         actionData.roomDescription);
-
-      var bucket = this._constants.SHARING_ROOM_URL[
-        "EMAIL_FROM_" + (from || "").toUpperCase()
-      ];
-      if (typeof bucket === "undefined") {
-        console.error("No URL sharing type bucket found for '" + from + "'");
-        return;
-      }
       loop.requestMulti(
         ["NotifyUITour", "Loop:RoomURLEmailed"],
-        ["TelemetryAddValue", "LOOP_SHARING_ROOM_URL", bucket],
         ["TelemetryAddValue", "LOOP_ACTIVITY_COUNTER", this._constants.LOOP_MAU_TYPE.ROOM_SHARE]
       );
     },
@@ -383,16 +363,8 @@ loop.store = loop.store || {};
         loop.request("NotifyUITour", "Loop:RoomURLShared");
       });
 
-      var from = actionData.from;
-      var bucket = this._constants.SHARING_ROOM_URL["FACEBOOK_FROM_" + from.toUpperCase()];
-      if (typeof bucket === "undefined") {
-        console.error("No URL sharing type bucket found for '" + from + "'");
-        return;
-      }
-      loop.requestMulti(
-        ["TelemetryAddValue", "LOOP_SHARING_ROOM_URL", bucket],
-        ["TelemetryAddValue", "LOOP_ACTIVITY_COUNTER", this._constants.LOOP_MAU_TYPE.ROOM_SHARE]
-      );
+      loop.request("TelemetryAddValue", "LOOP_ACTIVITY_COUNTER",
+        this._constants.LOOP_MAU_TYPE.ROOM_SHARE);
     },
 
     /**

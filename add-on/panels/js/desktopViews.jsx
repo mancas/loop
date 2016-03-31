@@ -21,7 +21,6 @@ loop.shared.desktopViews = (function(mozL10n) {
     propTypes: {
       callback: React.PropTypes.func,
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
-      locationForMetrics: React.PropTypes.string.isRequired,
       roomData: React.PropTypes.object.isRequired
     },
 
@@ -35,8 +34,7 @@ loop.shared.desktopViews = (function(mozL10n) {
       event.preventDefault();
 
       this.props.dispatcher.dispatch(new sharedActions.CopyRoomUrl({
-        roomUrl: this.props.roomData.roomUrl,
-        from: this.props.locationForMetrics
+        roomUrl: this.props.roomData.roomUrl
       }));
 
       this.setState({ copiedUrl: true });
@@ -76,7 +74,6 @@ loop.shared.desktopViews = (function(mozL10n) {
     propTypes: {
       callback: React.PropTypes.func,
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
-      locationForMetrics: React.PropTypes.string.isRequired,
       roomData: React.PropTypes.object.isRequired
     },
 
@@ -96,8 +93,7 @@ loop.shared.desktopViews = (function(mozL10n) {
       this.props.dispatcher.dispatch(
         new sharedActions.EmailRoomUrl({
           roomUrl: roomData.roomUrl,
-          roomDescription: contextURL,
-          from: this.props.locationForMetrics
+          roomDescription: contextURL
         }));
 
       this.props.callback && this.props.callback();
@@ -120,7 +116,6 @@ loop.shared.desktopViews = (function(mozL10n) {
     propTypes: {
       callback: React.PropTypes.func,
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
-      locationForMetrics: React.PropTypes.string.isRequired,
       roomData: React.PropTypes.object.isRequired
     },
 
@@ -128,7 +123,6 @@ loop.shared.desktopViews = (function(mozL10n) {
       event.preventDefault();
 
       this.props.dispatcher.dispatch(new sharedActions.FacebookShareRoomUrl({
-        from: this.props.locationForMetrics,
         roomUrl: this.props.roomData.roomUrl
       }));
 
@@ -154,7 +148,6 @@ loop.shared.desktopViews = (function(mozL10n) {
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
       error: React.PropTypes.object,
       facebookEnabled: React.PropTypes.bool.isRequired,
-      locationForMetrics: React.PropTypes.string.isRequired,
       // This data is supplied by the activeRoomStore.
       roomData: React.PropTypes.object.isRequired,
       show: React.PropTypes.bool.isRequired,
@@ -183,7 +176,6 @@ loop.shared.desktopViews = (function(mozL10n) {
               <CopyLinkButton
                 callback={this.props.callback}
                 dispatcher={this.props.dispatcher}
-                locationForMetrics={this.props.locationForMetrics}
                 roomData={this.props.roomData} />
             </div>
           </div>
@@ -194,14 +186,12 @@ loop.shared.desktopViews = (function(mozL10n) {
             <EmailLinkButton
               callback={this.props.callback}
               dispatcher={this.props.dispatcher}
-              locationForMetrics={this.props.locationForMetrics}
               roomData={this.props.roomData} />
             {(() => {
               if (this.props.facebookEnabled) {
                 return (<FacebookShareButton
                           callback={this.props.callback}
                           dispatcher={this.props.dispatcher}
-                          locationForMetrics={this.props.locationForMetrics}
                           roomData={this.props.roomData} />);
               }
             })()}

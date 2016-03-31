@@ -1563,8 +1563,7 @@ describe("loop.panel", function() {
 
       sinon.assert.called(dispatcher.dispatch);
       sinon.assert.calledWithExactly(dispatcher.dispatch, new sharedActions.CopyRoomUrl({
-        roomUrl: roomData.roomUrl,
-        from: "panel"
+        roomUrl: roomData.roomUrl
       }));
     });
 

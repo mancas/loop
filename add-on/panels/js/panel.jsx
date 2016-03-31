@@ -613,8 +613,7 @@ loop.panel = (function(_, mozL10n) {
       event.preventDefault();
 
       this.props.dispatcher.dispatch(new sharedActions.CopyRoomUrl({
-        roomUrl: this.props.room.roomUrl,
-        from: "panel"
+        roomUrl: this.props.room.roomUrl
       }));
 
       this.props.toggleDropdownMenu();
@@ -1100,7 +1099,6 @@ loop.panel = (function(_, mozL10n) {
             dispatcher={this.props.dispatcher}
             error={this.state.error}
             facebookEnabled={this.state.facebookEnabled}
-            locationForMetrics="panel"
             roomData={roomData}
             show={true}
             socialShareProviders={this.state.socialShareProviders} />

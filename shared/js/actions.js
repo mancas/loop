@@ -380,12 +380,9 @@ loop.shared.actions = (function() {
     /**
      * Copy a room url into the user's clipboard.
      * XXX: should move to some roomActions module - refs bug 1079284
-     * @from: where the invitation is shared from.
-     *        Possible values ['panel', 'conversation']
      * @roomUrl: the URL that is shared
      */
     CopyRoomUrl: Action.define("copyRoomUrl", {
-      from: String,
       roomUrl: String
     }),
 
@@ -397,7 +394,6 @@ loop.shared.actions = (function() {
      * @roomUrl: the URL that is shared
      */
     EmailRoomUrl: Action.define("emailRoomUrl", {
-      from: String,
       roomUrl: String
       // roomDescription: String, Optional.
     }),
@@ -411,7 +407,6 @@ loop.shared.actions = (function() {
      * @roomOrigin: the URL browsed when the sharing is started - Optional.
      */
     FacebookShareRoomUrl: Action.define("facebookShareRoomUrl", {
-      from: String,
       roomUrl: String
       // roomOrigin: String
     }),
