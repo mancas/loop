@@ -1003,11 +1003,219 @@ loop.standaloneRoomViews = (function(mozL10n) {
       }
 
       return (
-        <StandaloneRoomView
+        <NewStandaloneRoomView
           activeRoomStore={this.getStore()}
           cursorStore={this.props.cursorStore}
           dispatcher={this.props.dispatcher}
           isFirefox={this.props.isFirefox} />
+      );
+    }
+  });
+
+  var NewStandaloneRoomView = React.createClass({
+    mixins: [
+      Backbone.Events,
+      sharedMixins.MediaSetupMixin,
+      sharedMixins.RoomsAudioMixin,
+      sharedMixins.DocumentTitleMixin
+    ],
+
+    propTypes: {
+      // We pass conversationStore here rather than use the mixin, to allow
+      // easy configurability for the ui-showcase.
+      activeRoomStore: React.PropTypes.instanceOf(loop.store.ActiveRoomStore).isRequired,
+      cursorStore: React.PropTypes.instanceOf(loop.store.RemoteCursorStore).isRequired,
+      dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
+      introSeen: React.PropTypes.bool,
+      isFirefox: React.PropTypes.bool.isRequired,
+      // The poster URLs are for UI-showcase testing and development
+      localPosterUrl: React.PropTypes.string,
+      remotePosterUrl: React.PropTypes.string,
+      roomState: React.PropTypes.string,
+      screenSharePosterUrl: React.PropTypes.string
+    },
+
+    render: function() {
+      return (
+        <div className="room-conversation-wrapper standalone-room-wrapper">
+          <NewStandaloneRoomInfoArea
+            activeRoomStore={this.props.activeRoomStore}
+            dispatcher={this.props.dispatcher} />
+        </div>
+      );
+    }
+  });
+
+  var NewStandaloneRoomInfoArea = React.createClass({
+    propTypes: {
+      activeRoomStore: React.PropTypes.instanceOf(loop.store.ActiveRoomStore).isRequired,
+      dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired
+    },
+
+    componentWillMount: function() {
+      var tiles = [this.state.roomContextUrls[0]];
+      this.setState({
+        tiles: tiles
+      });
+    },
+
+    getInitialState: function() {
+      console.info(this.props.activeRoomStore.getStoreState());
+      var state = this.props.activeRoomStore.getStoreState();
+      state.showAddUrl = false;
+      return state;
+    },
+
+    addUrlTile: function(url) {
+      console.info(url);
+      this.toggleAddUrlPanel();
+      var newTile = {
+        description: url,
+        location: url
+      };
+
+      var tiles = this.state.tiles;
+      tiles.push(newTile);
+
+      this.setState({
+        tiles: tiles
+      });
+    },
+
+    toggleAddUrlPanel: function() {
+      this.setState({
+        showAddUrl: !this.state.showAddUrl
+      });
+    },
+
+    renderAddUrlView: function() {
+      return (
+        <StandaloneAddUrlView
+          handleAddUrlClick={this.addUrlTile} />
+      );
+    },
+
+    render: function() {
+      return (
+        <div className="media-layout">
+          <div className="media-wrapper">
+            <div className="new-room-info-area">
+              <div className="room-info-bar">
+                <h1>#ROOM NAME</h1>
+                <div className="room-actions">
+                  <button className="add-url" onClick={this.toggleAddUrlPanel} />
+                  {this.state.showAddUrl ? this.renderAddUrlView() : null}
+                </div>
+              </div>
+
+              <StandaloneRoomTiles
+                tiles={this.state.tiles}/>
+            </div>
+            <loop.shared.views.chat.TextChatView
+              dispatcher={this.props.dispatcher}
+              showInitialContext={true}
+              showTile={true} />
+          </div>
+        </div>
+      );
+    }
+  });
+
+  var StandaloneRoomTiles = React.createClass({
+    propTypes: {
+      tiles: React.PropTypes.array.isRequired
+    },
+
+    render: function() {
+      console.info(this.props.tiles);
+      return (
+        <div className="room-url-tiles">
+          {
+            this.props.tiles.map(function(tile, index) {
+              return (
+                <StandaloneRoomTileView
+                  key={index}
+                  tile={tile} />
+              );
+            }, this)
+          }
+        </div>
+      );
+    }
+  });
+
+  var StandaloneRoomTileView = React.createClass({
+    statics: {
+      GOOGLE_SCREENSHOT: "https://www.googleapis.com/pagespeedonline/v1/runPagespeed?screenshot=true&strategy=desktop&url="
+    },
+
+    propTypes: {
+      tile: React.PropTypes.object.isRequired
+    },
+
+    getInitialState: function() {
+      return {
+        screenshot: null
+      };
+    },
+
+    componentWillMount: function() {
+      var xhr = new XMLHttpRequest();
+      var url = this.constructor.GOOGLE_SCREENSHOT + this.props.tile.location;
+
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+          var response = JSON.parse(xhr.response).screenshot;
+          console.info(JSON.parse(xhr.response).screenshot);
+          var src = "data:" + response.mime_type + ";base64,";
+          var base64 = response.data;
+          base64 = base64.replace(/\_/g, "/");
+          base64 = base64.replace(/\-/g, "+");
+          src += base64;
+          this.setState({
+            screenshot: src
+          });
+        }
+      }.bind(this);
+      xhr.open("GET", url, true);
+      xhr.send();
+    },
+
+    shouldComponentUpdate: function(nextProps, nextState) {
+      return nextState.screenshot !== this.state.screenshot;
+    },
+
+    render: function() {
+      return (
+        <div className="url-tile">
+          <img className="tile-screenshot" src={this.state.screenshot} />
+          <div className="tile-info">
+            <a className="tile-name" href={this.props.tile.location} title={this.props.tile.description}>{this.props.tile.description}</a>
+            <h3 className="tile-url">{this.props.tile.location}</h3>
+          </div>
+        </div>
+      );
+    }
+  });
+
+  var StandaloneAddUrlView = React.createClass({
+    propTypes: {
+      handleAddUrlClick: React.PropTypes.func.isRequired
+    },
+
+    handleClick: function(event) {
+      event.preventDefault();
+      var input = this.refs.siteUrl.getDOMNode();
+      this.props.handleAddUrlClick(input.value);
+    },
+
+    render: function() {
+      return (
+        <div className="room-action-add-url">
+          <h2>Add a site to the room</h2>
+          <input placeholder="http://..." ref="siteUrl" type="text" />
+          <button onClick={this.handleClick}>Add site</button>
+        </div>
       );
     }
   });

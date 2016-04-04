@@ -359,11 +359,6 @@ html[dir="rtl"] .standalone-info-bar > .media-control-buttons > .btn-hangup:afte
   width: 16px;
  }
 
-/* Account for the height of the standalone infobar. */
-.media-layout {
-  padding-top: 40px;
-}
-
 .btn-large {
   font-size: 1rem;
   padding: .3em .5rem;
@@ -521,7 +516,6 @@ html[dir="rtl"] .standalone-info-bar > .media-control-buttons > .btn-hangup:afte
 .room-conversation-wrapper {
   position: relative;
   height: 100%;
-  background: #000;
 }
 
 /* gUM prompts */
@@ -786,4 +780,112 @@ html[dir="rtl"] .standalone-info-bar > .media-control-buttons > .btn-hangup:afte
   .issue-unsupported-platform .issue-box-content .info-panel {
     max-width: 300px;
   }
+}
+
+/* NEW UI */
+
+.new-room-info-area {
+  width: calc(100% - 272px - 40px);
+  height: 100%;
+  margin: 20px;
+  position: relative;
+}
+
+.new-room-info-area::after {
+  content: "";
+  display: block;
+  width: 93px;
+  height: 16px;
+  background-image: url("../../shared/img/hello_logo.svg");
+  background-size: contain;
+  background-repeat: no-repeat;
+  position: absolute;
+  bottom: 0;
+}
+
+.new-room-info-area > .room-info-bar {
+  text-align: left;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.new-room-info-area > .room-info-bar > h1 {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.new-room-info-area > .room-info-bar > .room-actions > button {
+  border: solid 1px #ebebeb;
+  background: rgba(51, 51, 51, 0.1);
+  height: 30px;
+  width: 30px;
+  cursor: pointer;
+}
+
+.new-room-info-area > .room-info-bar > .room-actions > button.add-url::after {
+  content: url("../../shared/img/icons-16x16.svg#add-hover");
+}
+
+.new-room-info-area > .room-info-bar > .room-actions > button.add-url:hover::after {
+  content: url("../../shared/img/icons-16x16.svg#add-active");
+}
+
+.new-room-info-area > .room-url-tiles {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.new-room-info-area > .room-url-tiles > .url-tile {
+  border-radius: 4px;
+  width: 250px;
+  background: #a6a6a6;
+  box-shadow: 1px 2px 4px rgba(0,0,0,.4);
+  margin-bottom: 20px;
+}
+
+.new-room-info-area > .room-url-tiles > .url-tile > .tile-screenshot {
+  width: 100%;
+  display: block;
+}
+
+.new-room-info-area > .room-url-tiles > .url-tile > .tile-info {
+  padding: 15px;
+  height: 75px;
+  background: #fff;
+  text-align: left;
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
+  font-size: 12px;
+}
+
+.new-room-info-area > .room-url-tiles > .url-tile > .tile-info > .tile-name,
+.new-room-info-area > .room-url-tiles > .url-tile > .tile-info > .tile-url {
+  width: calc(200px - 30px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+.new-room-info-area > .room-info-bar > .room-actions > .room-action-add-url {
+  position: absolute;
+  right: 0;
+  padding: 20px;
+  box-shadow: 1px 2px 4px rgba(0,0,0,.4);
+  width: 250px;
+  background-color: #fff;
+}
+
+.new-room-info-area > .room-info-bar > .room-actions > .room-action-add-url > input {
+  display: block;
+  width: 100%;
+}
+
+.new-room-info-area > .room-info-bar > .room-actions > .room-action-add-url > button {
+  width: 100%;
 }
