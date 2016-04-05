@@ -5,8 +5,14 @@
 var loop = loop || {};
 loop.shared = loop.shared || {};
 
-loop.shared.toc = (function() {
+loop.shared.toc = (function(mozL10n) {
   "use strict";
+
+  var ROOM_INFO_FAILURES = loop.shared.utils.ROOM_INFO_FAILURES;
+  var ROOM_STATES = loop.store.ROOM_STATES;
+  var sharedActions = loop.shared.actions;
+  var sharedMixins = loop.shared.mixins;
+  var sharedViews = loop.shared.views;
 
   var TableOfContentView = React.createClass({
     propTypes: {
@@ -297,7 +303,321 @@ loop.shared.toc = (function() {
     }
   });
 
+  /* This is a fork of the StandaloneRoomView */
+  var RoomView = React.createClass({
+    mixins: [
+      Backbone.Events,
+      sharedMixins.MediaSetupMixin,
+      sharedMixins.RoomsAudioMixin,
+      sharedMixins.DocumentTitleMixin
+    ],
+
+    propTypes: {
+      // We pass conversationStore here rather than use the mixin, to allow
+      // easy configurability for the ui-showcase.
+      activeRoomStore: React.PropTypes.instanceOf(loop.store.ActiveRoomStore).isRequired,
+      cursorStore: React.PropTypes.instanceOf(loop.store.RemoteCursorStore).isRequired,
+      dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
+      introSeen: React.PropTypes.bool,
+      isFirefox: React.PropTypes.bool.isRequired,
+      // The poster URLs are for UI-showcase testing and development
+      localPosterUrl: React.PropTypes.string,
+      remotePosterUrl: React.PropTypes.string,
+      roomState: React.PropTypes.string,
+      screenSharePosterUrl: React.PropTypes.string
+    },
+    getInitialState: function() {
+      // Uncomment this line to see the slideshow every time while developing:
+      // localStorage.removeItem("introSeen");
+
+      // Used by the UI showcase to override localStorage value to hide or show FTU slideshow.
+      // localStorage sourced data is always string or null
+      var introSeen = false;
+      if (this.props.introSeen !== undefined) {
+        if (this.props.introSeen) {
+          introSeen = true;
+        }
+      } else {
+        if (localStorage.getItem("introSeen") !== null) {
+          introSeen = true;
+        }
+      }
+      var storeState = this.props.activeRoomStore.getStoreState();
+      return _.extend({}, storeState, {
+        // Used by the UI showcase.
+        roomState: this.props.roomState || storeState.roomState,
+        introSeen: introSeen
+      });
+    },
+
+    componentWillMount: function() {
+      this.props.activeRoomStore.on("change", function() {
+        this.setState(this.props.activeRoomStore.getStoreState());
+      }, this);
+    },
+
+    componentWillUnmount: function() {
+      this.props.activeRoomStore.off("change", null, this);
+    },
+
+    componentDidMount: function() {
+      // Adding a class to the document body element from here to ease styling it.
+      document.body.classList.add("is-standalone-room");
+    },
+
+    /**
+     * Watches for when we transition to MEDIA_WAIT room state, so we can request
+     * user media access.
+     *
+     * @param  {Object} nextProps (Unused)
+     * @param  {Object} nextState Next state object.
+     */
+    componentWillUpdate: function(nextProps, nextState) {
+      if (this.state.roomState !== ROOM_STATES.READY &&
+          nextState.roomState === ROOM_STATES.READY) {
+        var roomName = nextState.roomName;
+        if (!roomName && nextState.roomContextUrls) {
+          roomName = nextState.roomContextUrls[0].description ||
+              nextState.roomContextUrls[0].location;
+        }
+        if (!roomName) {
+          this.setTitle(mozL10n.get("clientShortname2"));
+        } else {
+          this.setTitle(mozL10n.get("standalone_title_with_room_name", {
+            roomName: roomName,
+            clientShortname: mozL10n.get("clientShortname2")
+          }));
+        }
+      }
+
+      if (this.state.roomState !== ROOM_STATES.MEDIA_WAIT &&
+          nextState.roomState === ROOM_STATES.MEDIA_WAIT) {
+        this.props.dispatcher.dispatch(new sharedActions.SetupStreamElements({
+          publisherConfig: this.getDefaultPublisherConfig({ publishVideo: true })
+        }));
+      }
+
+      // UX don't want to surface these errors (as they would imply the user
+      // needs to do something to fix them, when if they're having a conversation
+      // they just need to connect). However, we do want there to be somewhere to
+      // find reasonably easily, in case there's issues raised.
+      if (!this.state.roomInfoFailure && nextState.roomInfoFailure) {
+        if (nextState.roomInfoFailure === ROOM_INFO_FAILURES.WEB_CRYPTO_UNSUPPORTED) {
+          console.error(mozL10n.get("room_information_failure_unsupported_browser"));
+        } else {
+          console.error(mozL10n.get("room_information_failure_not_available"));
+        }
+      }
+    },
+
+    joinRoom: function() {
+      this.props.dispatcher.dispatch(new sharedActions.JoinRoom());
+    },
+
+    leaveRoom: function() {
+      this.props.dispatcher.dispatch(new sharedActions.LeaveRoom());
+    },
+
+    closeIntroOverlay: function() {
+      localStorage.setItem("introSeen", "true");
+      this.setState({ introSeen: true });
+      this.joinRoom();
+    },
+
+    /**
+     * Checks if current room is active.
+     *
+     * @return {Boolean}
+     */
+    _roomIsActive: function() {
+      return this.state.roomState === ROOM_STATES.JOINED ||
+             this.state.roomState === ROOM_STATES.SESSION_CONNECTED ||
+             this.state.roomState === ROOM_STATES.HAS_PARTICIPANTS;
+    },
+
+    /**
+     * Works out if remote video should be rended or not, depending on the
+     * room state and other flags.
+     *
+     * @return {Boolean} True if remote video should be rended.
+     *
+     * XXX Refactor shouldRenderRemoteVideo & shouldRenderLoading to remove
+     *     overlapping cases.
+     */
+    shouldRenderRemoteVideo: function() {
+      switch (this.state.roomState) {
+        case ROOM_STATES.HAS_PARTICIPANTS:
+          if (this.state.remoteVideoEnabled) {
+            return true;
+          }
+
+          if (this.state.mediaConnected) {
+            // since the remoteVideo hasn't yet been enabled, if the
+            // media is connected, then we should be displaying an avatar.
+            return false;
+          }
+
+          return true;
+
+        case ROOM_STATES.READY:
+        case ROOM_STATES.GATHER:
+        case ROOM_STATES.INIT:
+        case ROOM_STATES.JOINING:
+        case ROOM_STATES.SESSION_CONNECTED:
+        case ROOM_STATES.JOINED:
+        case ROOM_STATES.MEDIA_WAIT:
+          // this case is so that we don't show an avatar while waiting for
+          // the other party to connect
+          return true;
+
+        case ROOM_STATES.FAILED:
+        case ROOM_STATES.CLOSING:
+        case ROOM_STATES.FULL:
+        case ROOM_STATES.ENDED:
+          // the other person has shown up, so we don't want to show an avatar
+          return true;
+
+        default:
+          console.warn("StandaloneRoomView.shouldRenderRemoteVideo:" +
+            " unexpected roomState: ", this.state.roomState);
+          return true;
+
+      }
+    },
+
+    /**
+     * Should we render a visual cue to the user (e.g. a spinner) that a local
+     * stream is on its way from the camera?
+     *
+     * @returns {boolean}
+     * @private
+     */
+    _isLocalLoading: function() {
+      return this.state.roomState === ROOM_STATES.MEDIA_WAIT &&
+             !this.state.localSrcMediaElement;
+    },
+
+    /**
+     * Should we render a visual cue to the user (e.g. a spinner) that a remote
+     * stream is on its way from the other user?
+     *
+     * @returns {boolean}
+     * @private
+     */
+    _isRemoteLoading: function() {
+      return !!(this.state.roomState === ROOM_STATES.HAS_PARTICIPANTS &&
+                !this.state.remoteSrcMediaElement &&
+                !this.state.mediaConnected);
+    },
+
+    /**
+     * Should we render a visual cue to the user (e.g. a spinner) that a remote
+     * screen-share is on its way from the other user?
+     *
+     * @returns {boolean}
+     * @private
+     */
+    _isScreenShareLoading: function() {
+      return this.state.receivingScreenShare &&
+             !this.state.screenShareMediaElement &&
+             !this.props.screenSharePosterUrl &&
+             !this.state.streamPaused;
+    },
+
+    /**
+     * Should we render the ads when there is no participants in the room
+     *
+     * @returns {boolean}
+     * @private
+     */
+    _shouldRenderTile: function() {
+      return this.state.roomState === ROOM_STATES.JOINED ||
+             this.state.roomState === ROOM_STATES.SESSION_CONNECTED &&
+             this.state.roomState !== ROOM_STATES.HAS_PARTICIPANTS;
+    },
+
+    render: function() {
+      var displayScreenShare = !!(this.state.receivingScreenShare ||
+        this.props.screenSharePosterUrl);
+
+      return (
+
+        <div className="room-conversation-wrapper standalone-room-wrapper">
+          <TableOfContentView
+            activeRoomStore={this.props.activeRoomStore}
+            isDesktop={true} />
+
+          <sharedViews.MediaLayoutView
+            cursorStore={this.props.cursorStore}
+            dispatcher={this.props.dispatcher}
+            displayScreenShare={displayScreenShare}
+            isLocalLoading={this._isLocalLoading()}
+            isRemoteLoading={this._isRemoteLoading()}
+            isScreenShareLoading={this._isScreenShareLoading()}
+            localPosterUrl={this.props.localPosterUrl}
+            localSrcMediaElement={this.state.localSrcMediaElement}
+            localVideoMuted={this.state.videoMuted}
+            matchMedia={this.state.matchMedia || window.matchMedia.bind(window)}
+            remotePosterUrl={this.props.remotePosterUrl}
+            remoteSrcMediaElement={this.state.remoteSrcMediaElement}
+            renderRemoteVideo={this.shouldRenderRemoteVideo()}
+            screenShareMediaElement={this.state.screenShareMediaElement}
+            screenSharePosterUrl={this.props.screenSharePosterUrl}
+            screenSharingPaused={this.state.streamPaused}
+            showInitialContext={true}
+            showMediaWait={this.state.roomState === ROOM_STATES.MEDIA_WAIT}
+            showTile={this._shouldRenderTile()}>
+          </sharedViews.MediaLayoutView>
+        </div>
+      );
+    }
+  });
+
+  /* This is a fork of the StandlaoneRoomControllerView */
+  var RoomControllerView = React.createClass({
+    mixins: [
+      loop.store.StoreMixin("activeRoomStore")
+    ],
+
+    propTypes: {
+      cursorStore: React.PropTypes.instanceOf(loop.store.RemoteCursorStore).isRequired,
+      dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
+      isFirefox: React.PropTypes.bool.isRequired
+    },
+
+    getInitialState: function() {
+      return this.getStoreState();
+    },
+
+    render: function() {
+      // If we don't know yet, don't display anything.
+      if (this.state.userAgentHandlesRoom === undefined) {
+        return null;
+      }
+
+      // if (this.state.userAgentHandlesRoom) {
+      //   return (
+      //     <StandaloneHandleUserAgentView
+      //       dispatcher={this.props.dispatcher} />
+      //   );
+      // }
+
+      // XXX force into HAS_PARTICIPANTS mode...
+      return (
+        <RoomView
+          activeRoomStore={this.getStore()}
+          cursorStore={this.props.cursorStore}
+          dispatcher={this.props.dispatcher}
+          isFirefox={this.props.isFirefox}
+        />
+      );
+    }
+  });
+
+
   return {
+    RoomControllerView: RoomControllerView,
+    RoomView: RoomView,
     TableOfContentView: TableOfContentView
   };
-})();
+})(navigator.mozL10n || document.mozL10n);
