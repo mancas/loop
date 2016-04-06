@@ -925,7 +925,9 @@ loop.store.ActiveRoomStore = (function(mozL10n) {
           videoSource: "browser",
           constraints: {
             browserWindow: windowId,
-            scrollWithPage: true
+            scrollWithPage: true,
+            viewportOffsetX: 200,
+            viewportOffsetY: 200
           }
         };
         this._sdkDriver.startScreenShare(options);

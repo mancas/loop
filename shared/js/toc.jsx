@@ -434,6 +434,17 @@ loop.shared.toc = (function(mozL10n) {
              !this.state.streamPaused;
     },
 
+    /**
+     * Checks if current room is active.
+     *
+     * @return {Boolean}
+     */
+    _roomIsActive: function() {
+      return this.state.roomState === ROOM_STATES.JOINED ||
+             this.state.roomState === ROOM_STATES.SESSION_CONNECTED ||
+             this.state.roomState === ROOM_STATES.HAS_PARTICIPANTS;
+    },
+
     render: function() {
       var displayScreenShare = !!(this.state.receivingScreenShare ||
         this.props.screenSharePosterUrl);
@@ -457,8 +468,13 @@ loop.shared.toc = (function(mozL10n) {
 
           <SidebarView
             activeRoomStore={this.props.activeRoomStore}
+            audio={{ enabled: !this.state.audioMuted,
+                     visible: this._roomIsActive() }}
             dispatcher={this.props.dispatcher}
-            isFirefox={this.props.isFirefox}/>
+            isFirefox={this.props.isFirefox}
+            leaveRoom={this.leaveRoom}
+            video={{ enabled: !this.state.videoMuted,
+                     visible: this._roomIsActive() }} />
         </div>
       );
     }
@@ -517,13 +533,16 @@ loop.shared.toc = (function(mozL10n) {
       // We pass conversationStore here rather than use the mixin, to allow
       // easy configurability for the ui-showcase.
       activeRoomStore: React.PropTypes.instanceOf(loop.store.ActiveRoomStore).isRequired,
+      audio: React.PropTypes.object.isRequired,
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
       introSeen: React.PropTypes.bool,
       isFirefox: React.PropTypes.bool.isRequired,
+      leaveRoom: React.PropTypes.func.isRequired,
       // The poster URLs are for UI-showcase testing and development
       localPosterUrl: React.PropTypes.string,
       remotePosterUrl: React.PropTypes.string,
-      roomState: React.PropTypes.string
+      roomState: React.PropTypes.string,
+      video: React.PropTypes.object.isRequired
     },
 
     getInitialState: function() {
@@ -695,9 +714,11 @@ loop.shared.toc = (function(mozL10n) {
       return (
         <div className="sidebar">
           <sharedViews.MediaLayoutView
+            audio={this.props.audio}
             dispatcher={this.props.dispatcher}
             isLocalLoading={this._isLocalLoading()}
             isRemoteLoading={this._isRemoteLoading()}
+            leaveRoom={this.props.leaveRoom}
             localPosterUrl={this.props.localPosterUrl}
             localSrcMediaElement={this.state.localSrcMediaElement}
             localVideoMuted={this.state.videoMuted}
@@ -707,7 +728,8 @@ loop.shared.toc = (function(mozL10n) {
             renderRemoteVideo={this.shouldRenderRemoteVideo()}
             showInitialContext={true}
             showMediaWait={this.state.roomState === ROOM_STATES.MEDIA_WAIT}
-            showTile={false} />
+            showTile={false}
+            video={this.props.video} />
         </div>
       );
     }

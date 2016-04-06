@@ -900,10 +900,12 @@ loop.shared.views = (function(_, mozL10n) {
 
   var MediaLayoutView = React.createClass({
     propTypes: {
+      audio: React.PropTypes.object.isRequired,
       children: React.PropTypes.node,
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
       isLocalLoading: React.PropTypes.bool.isRequired,
       isRemoteLoading: React.PropTypes.bool.isRequired,
+      leaveRoom: React.PropTypes.func.isRequired,
       // The poster URLs are for UI-showcase testing and development.
       localPosterUrl: React.PropTypes.string,
       localSrcMediaElement: React.PropTypes.object,
@@ -916,7 +918,8 @@ loop.shared.views = (function(_, mozL10n) {
       renderRemoteVideo: React.PropTypes.bool.isRequired,
       showInitialContext: React.PropTypes.bool.isRequired,
       showMediaWait: React.PropTypes.bool.isRequired,
-      showTile: React.PropTypes.bool.isRequired
+      showTile: React.PropTypes.bool.isRequired,
+      video: React.PropTypes.object.isRequired
     },
 
     isLocalMediaAbsolutelyPositioned: function(matchMedia) {
@@ -1029,6 +1032,15 @@ loop.shared.views = (function(_, mozL10n) {
                 this.renderLocalVideo() : null}
               {this.props.children}
             </div>
+            {
+              !this.props.showMediaWait ?
+                <MediaButtonsView
+                  audio={this.props.audio}
+                  dispatcher={this.props.dispatcher}
+                  leaveRoom={this.props.leaveRoom}
+                  video={this.props.video}
+                  /> : null
+            }
             <loop.shared.views.chat.TextChatView
               dispatcher={this.props.dispatcher}
               showInitialContext={this.props.showInitialContext}
@@ -1038,6 +1050,38 @@ loop.shared.views = (function(_, mozL10n) {
             {this.props.showMediaWait ?
               this.renderMediaWait() : null}
           </div>
+        </div>
+      );
+    }
+  });
+
+  var MediaButtonsView = React.createClass({
+    propTypes: {
+      audio: React.PropTypes.object.isRequired,
+      dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
+      leaveRoom: React.PropTypes.func.isRequired,
+      video: React.PropTypes.object.isRequired
+    },
+
+    getDefaultProps: function() {
+      return {
+        video: { enabled: true, visible: true },
+        audio: { enabled: true, visible: true }
+      };
+    },
+
+    render: function() {
+      return (
+        <div className="media-control-buttons">
+          <VideoMuteButton
+            dispatcher={this.props.dispatcher}
+            muted={!this.props.video.enabled}/>
+          <AudioMuteButton
+            dispatcher={this.props.dispatcher}
+            muted={!this.props.audio.enabled}/>
+          <HangUpControlButton
+            action={this.props.leaveRoom}
+            title={mozL10n.get("rooms_leave_button_label")}/>
         </div>
       );
     }
