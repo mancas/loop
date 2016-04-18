@@ -17,6 +17,7 @@ loop.shared.toc = (function(mozL10n) {
   var TableOfContentView = React.createClass({
     propTypes: {
       activeRoomStore: React.PropTypes.instanceOf(loop.store.ActiveRoomStore).isRequired,
+      dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
       isDesktop: React.PropTypes.bool.isRequired,
       isScreenShareActive: React.PropTypes.bool.isRequired
     },
@@ -70,7 +71,10 @@ loop.shared.toc = (function(mozL10n) {
         <div className={cssClasses}>
           <RoomInfoBarView
             addUrlTile={this.addTile}
-            isDesktop={this.props.isDesktop} />
+            dispatcher={this.props.dispatcher}
+            isDesktop={this.props.isDesktop}
+            roomName={this.state.roomName}
+            roomToken={this.state.roomToken} />
           <RoomContentView
             tiles={this.state.tiles} />
         </div>
@@ -81,13 +85,28 @@ loop.shared.toc = (function(mozL10n) {
   var RoomInfoBarView = React.createClass({
     propTypes: {
       addUrlTile: React.PropTypes.func.isRequired,
-      isDesktop: React.PropTypes.bool.isRequired
+      dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
+      isDesktop: React.PropTypes.bool.isRequired,
+      roomName: React.PropTypes.string.isRequired,
+      roomToken: React.PropTypes.string.isRequired
+    },
+
+    componentWillReceiveProps: function(nextProps) {
+      this.setState({
+        roomName: nextProps.roomName || "#ROOM NAME"
+      });
+    },
+
+    componentDidUpdate: function() {
+      if (this.state.editMode) {
+        this.getDOMNode().querySelector(".edit-room-name").focus();
+      }
     },
 
     getInitialState: function() {
       return {
         editMode: false,
-        roomName: "#ROOM NAME"
+        roomName: this.props.roomName || "#ROOM NAME"
       };
     },
 
@@ -108,6 +127,12 @@ loop.shared.toc = (function(mozL10n) {
     },
 
     exitEditMode: function() {
+      this.props.dispatcher.dispatch(
+        new sharedActions.UpdateRoomContext({
+          roomToken: this.props.roomToken,
+          newRoomName: this.state.roomName
+        })
+      );
       this.setState({ editMode: false });
     },
 
