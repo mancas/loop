@@ -307,6 +307,8 @@ loop.store.ActiveRoomStore = (function(mozL10n) {
      * @param {sharedActions.SetupWindowData} actionData
      */
     setupWindowData: function(actionData) {
+      console.error("in setupWindowData");
+
       if (actionData.type !== "room") {
         // Nothing for us to do here, leave it to other stores.
         return Promise.resolve();
@@ -609,10 +611,15 @@ loop.store.ActiveRoomStore = (function(mozL10n) {
       // for the UX for that. See bug 1166824. In the meantime this gives us
       // additional information for analysis.
       loop.shared.utils.hasAudioOrVideoDevices(function(hasDevices) {
+        console.error("hasDevices", hasDevices);
+
         if (hasDevices) {
           // MEDIA_WAIT causes the views to dispatch sharedActions.SetupStreamElements,
           // which in turn starts the sdk obtaining the device permission.
           this.setStoreState({ roomState: ROOM_STATES.MEDIA_WAIT });
+          console.error("MEDIA_WAIT set");
+          console.error("this", this);
+          console.error("window.location", window.location);
         } else {
           this.dispatchAction(new sharedActions.ConnectionFailure({
             reason: FAILURE_DETAILS.NO_MEDIA
@@ -690,9 +697,13 @@ loop.store.ActiveRoomStore = (function(mozL10n) {
         return;
       }
 
+      console.error("before metricsLog");
+
       this.dispatcher.dispatch(new sharedActions.MetricsLogJoinRoom({
         userAgentHandledRoom: false
       }));
+
+      console.error("after metricsLog");
 
       // Otherwise, we handle the room ourselves.
       this._checkDevicesAndJoinRoom();

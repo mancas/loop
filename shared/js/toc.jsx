@@ -629,6 +629,7 @@ loop.shared.toc = (function(mozL10n) {
         }
       }
 
+      console.log("nextState.roomState", nextState.roomState);
       if (this.state.roomState !== ROOM_STATES.MEDIA_WAIT &&
           nextState.roomState === ROOM_STATES.MEDIA_WAIT) {
         this.props.dispatcher.dispatch(new sharedActions.SetupStreamElements({

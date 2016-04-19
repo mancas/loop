@@ -31,7 +31,7 @@ loop.sidebar = (function() {
       switch (this.state.windowType) {
         case "room": {
           return (
-             <SidebarView
+             <DesktopSidebarView
                activeRoomStore={this.props.activeRoomStore}
                dispatcher={this.props.dispatcher} />
           );
@@ -49,7 +49,7 @@ loop.sidebar = (function() {
     }
   });
 
-  var SidebarView = React.createClass({
+  var DesktopSidebarView = React.createClass({
     propTypes: {
       activeRoomStore: React.PropTypes.instanceOf(loop.store.ActiveRoomStore).isRequired,
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired
