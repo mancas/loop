@@ -356,7 +356,19 @@ var WindowListener = {
         var browser = ownerDocument.getElementById("browser");
 
         let sidebarBrowser = document.createElementNS(kNSXUL, "browser");
-        sidebarBrowser.setAttribute("id", "loop-side-iframe");
+        sidebarBrowser.setAttribute("id", "loop-side-browser");
+        sidebarBrowser.setAttribute("disable-history", "true");
+        sidebarBrowser.setAttribute("disable-global-history", "true");
+
+        // XXX something like these seem likely to be required once we
+        // electrolyze this along with a URI_MUST_LOAD_IN_CHILD in
+        // AboutLoop.jsm
+        // sidebarBrowser.setAttribute("message-manager-group", "social");
+        // sidebarBrowser.setAttribute("message", "true");
+        // sidebarBrowser.setAttribute("remote", "true");
+
+        sidebarBrowser.setAttribute("type", "content");
+
         this.sidebar = sidebarBrowser;
         this.sidebar.width = 250;
 
@@ -364,7 +376,7 @@ var WindowListener = {
       },
 
       loadSidebar: function(token) {
-        log.info("MANU", token, this.sidebar);
+        log.info("loadSidebar called:", token, this.sidebar);
         this.sidebar.setAttribute("src", "about:loopconversation#" + token);
       },
 
