@@ -369,6 +369,11 @@ var WindowListener = {
         this.frame.setAttribute("src", "about:loopconversation");
       },
 
+      loadSidebar: function(token) {
+        log.info("MANU", token, this.frame);
+        this.frame.setAttribute("src", "about:loopconversation#" + token);
+      },
+
       /**
        * Adds a menu item to the browsers' Tools menu that open the Loop panel
        * when selected.
