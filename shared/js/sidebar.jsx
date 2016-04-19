@@ -15,11 +15,16 @@ loop.sidebar = (function() {
   var SidebarControllerView = React.createClass({
     mixins: [sharedMixins.UrlHashChangeMixin,
              sharedMixins.DocumentLocationMixin,
+             loop.store.StoreMixin("activeRoomStore"),
              Backbone.Events],
 
     propTypes: {
       activeRoomStore: React.PropTypes.instanceOf(loop.store.ActiveRoomStore).isRequired,
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired
+    },
+
+    getInitialState: function() {
+      return this.getStoreState();
     },
 
     render: function() {
@@ -97,6 +102,7 @@ loop.sidebar = (function() {
     });
 
     var activeRoomStore = new loop.store.ActiveRoomStore(dispatcher, {
+      isDesktop: true, // XXX do we need this?
       sdkDriver: sdkDriver
     });
 
