@@ -351,27 +351,21 @@ var WindowListener = {
 
       /* XXX make this into it's own object */
       addSidebar: function() {
-
         let ownerDocument = gBrowser.ownerDocument;
 
         var browser = ownerDocument.getElementById("browser");
 
-        // this._splitter = ownerDocument.createElement("splitter");
-        // this._splitter.setAttribute("class", "loop-side-splitter");
+        let sidebarBrowser = document.createElementNS(kNSXUL, "browser");
+        sidebarBrowser.setAttribute("id", "loop-side-iframe");
+        this.sidebar = sidebarBrowser;
+        this.sidebar.width = 250;
 
-        this.frame = ownerDocument.createElement("iframe");
-        this.frame.className = "loop-side-iframe";
-        this.frame.width = 250;
-
-        // this._sidebar.appendChild(this._splitter);
-        browser.appendChild(this.frame);
-
-        this.frame.setAttribute("src", "about:loopconversation");
+        browser.appendChild(sidebarBrowser);
       },
 
       loadSidebar: function(token) {
-        log.info("MANU", token, this.frame);
-        this.frame.setAttribute("src", "about:loopconversation#" + token);
+        log.info("MANU", token, this.sidebar);
+        this.sidebar.setAttribute("src", "about:loopconversation#" + token);
       },
 
       /**
