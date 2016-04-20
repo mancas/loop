@@ -478,8 +478,8 @@ loop.shared.toc = (function(mozL10n) {
 
         <div className="room-conversation-wrapper standalone-room-wrapper">
           <TableOfContentView
-            dispatcher={this.props.dispatcher}
             activeRoomStore={this.props.activeRoomStore}
+            dispatcher={this.props.dispatcher}
             isDesktop={true}
             isScreenShareActive={displayScreenShare} />
 
