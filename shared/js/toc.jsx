@@ -73,7 +73,7 @@ loop.shared.toc = (function(mozL10n) {
             addUrlTile={this.addTile}
             dispatcher={this.props.dispatcher}
             isDesktop={this.props.isDesktop}
-            roomName={this.state.roomName}
+            roomName={this.state.roomName ? this.state.roomName : "BUG: NO NAME SPECIFIED" }
             roomToken={this.state.roomToken} />
           <RoomContentView
             tiles={this.state.tiles} />
@@ -478,6 +478,7 @@ loop.shared.toc = (function(mozL10n) {
 
         <div className="room-conversation-wrapper standalone-room-wrapper">
           <TableOfContentView
+            dispatcher={this.props.dispatcher}
             activeRoomStore={this.props.activeRoomStore}
             isDesktop={true}
             isScreenShareActive={displayScreenShare} />
