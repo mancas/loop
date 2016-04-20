@@ -47,7 +47,7 @@ loop.sidebar = (function(mozL10n) {
         // anything to avoid flicker.
         return (
           <div>
-            <p>I'm a sidebar</p>
+            <p>{"If you see this, please file a bug"}</p>
           </div>
         );
       }

@@ -1038,8 +1038,7 @@ loop.shared.views = (function(_, mozL10n) {
                   audio={this.props.audio}
                   dispatcher={this.props.dispatcher}
                   leaveRoom={this.props.leaveRoom}
-                  video={this.props.video}
-                  /> : null
+                  video={this.props.video} /> : null
             }
             <loop.shared.views.chat.TextChatView
               dispatcher={this.props.dispatcher}
@@ -1075,13 +1074,13 @@ loop.shared.views = (function(_, mozL10n) {
         <div className="media-control-buttons">
           <VideoMuteButton
             dispatcher={this.props.dispatcher}
-            muted={!this.props.video.enabled}/>
+            muted={!this.props.video.enabled} />
           <AudioMuteButton
             dispatcher={this.props.dispatcher}
-            muted={!this.props.audio.enabled}/>
+            muted={!this.props.audio.enabled} />
           <HangUpControlButton
             action={this.props.leaveRoom}
-            title={mozL10n.get("rooms_leave_button_label")}/>
+            title={mozL10n.get("rooms_leave_button_label")} />
         </div>
       );
     }
