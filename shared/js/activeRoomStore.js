@@ -307,7 +307,7 @@ loop.store.ActiveRoomStore = (function(mozL10n) {
      * @param {sharedActions.SetupWindowData} actionData
      */
     setupWindowData: function(actionData) {
-      console.error("in setupWindowData");
+      console.error("in setupWindowData", actionData);
 
       if (actionData.type !== "room") {
         // Nothing for us to do here, leave it to other stores.
@@ -365,7 +365,6 @@ loop.store.ActiveRoomStore = (function(mozL10n) {
      *                   if Firefox handles the room or not.
      */
     fetchServerData: function(actionData) {
-      console.info(actionData);
       if (actionData.windowType !== "room") {
         // Nothing for us to do here, leave it to other stores.
         return Promise.resolve();
