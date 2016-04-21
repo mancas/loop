@@ -36,7 +36,7 @@ loop.toc = (function() {
       window.addEventListener("unload", function() {
         dispatcher.dispatch(new sharedActions.WindowUnload());
       });
-  console.info(activeRoomStore);
+
       React.render(<tocViews.TableOfContentView
                     activeRoomStore={activeRoomStore}
                     dispatcher={dispatcher}

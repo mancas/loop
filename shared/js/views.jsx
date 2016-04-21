@@ -898,6 +898,7 @@ loop.shared.views = (function(_, mozL10n) {
     }
   });
 
+  // XXX akita-sidebar
   var MediaLayoutView = React.createClass({
     propTypes: {
       audio: React.PropTypes.object.isRequired,
