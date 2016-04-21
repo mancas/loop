@@ -889,18 +889,21 @@ console.log(view.getDOMNode().querySelector(".context-wrapper").childNodes);
 
     function mountTestComponent(extraProps) {
       var defaultProps = {
+        audio: { enabled: true, visible: true },
         cursorStore: remoteCursorStore,
         dispatcher: dispatcher,
         displayScreenShare: false,
         isLocalLoading: false,
         isRemoteLoading: false,
         isScreenShareLoading: false,
+        leaveRoom: function foo() {},
         localVideoMuted: false,
         matchMedia: window.matchMedia,
         renderRemoteVideo: false,
         showInitialContext: false,
         showMediaWait: false,
-        showTile: false
+        showTile: false,
+        video: { enabled: true, visible: true }
       };
 
       return TestUtils.renderIntoDocument(

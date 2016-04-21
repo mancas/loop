@@ -817,12 +817,15 @@ loop.standaloneRoomViews = (function(mozL10n) {
             video={{ enabled: !this.state.videoMuted,
                      visible: this._roomIsActive() }} />
           <sharedViews.MediaLayoutView
+            audio={{ enabled: !this.state.audioMuted,
+                     visible: this._roomIsActive() }}
             cursorStore={this.props.cursorStore}
             dispatcher={this.props.dispatcher}
             displayScreenShare={displayScreenShare}
             isLocalLoading={this._isLocalLoading()}
             isRemoteLoading={this._isRemoteLoading()}
             isScreenShareLoading={this._isScreenShareLoading()}
+            leaveRoom={this.leaveRoom}
             localPosterUrl={this.props.localPosterUrl}
             localSrcMediaElement={this.state.localSrcMediaElement}
             localVideoMuted={this.state.videoMuted || !this.state.localVideoEnabled}
@@ -835,7 +838,9 @@ loop.standaloneRoomViews = (function(mozL10n) {
             screenSharingPaused={this.state.streamPaused}
             showInitialContext={true}
             showMediaWait={this.state.roomState === ROOM_STATES.MEDIA_WAIT}
-            showTile={this._shouldRenderTile()}>
+            showTile={this._shouldRenderTile()}
+            video={{ enabled: !this.state.videoMuted,
+                     visible: this._roomIsActive() }}>
             <StandaloneRoomInfoArea activeRoomStore={this.props.activeRoomStore}
               dispatcher={this.props.dispatcher}
               failureReason={this.state.failureReason}
