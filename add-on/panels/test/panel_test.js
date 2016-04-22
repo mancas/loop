@@ -81,6 +81,7 @@ describe("loop.panel", function() {
       HangupAllChatWindows: function() {},
       IsMultiProcessActive: sinon.stub(),
       IsTabShareable: sinon.stub(),
+      LoadSidebar: sinon.stub(),
       LoginToFxA: sinon.stub(),
       LogoutFromFxA: sinon.stub(),
       NotifyUITour: sinon.stub(),
