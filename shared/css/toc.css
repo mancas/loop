@@ -1,3 +1,7 @@
+body.desktop-toc .toc-wrapper {
+  width: 100%;
+}
+
 .toc-wrapper {
   display: flex;
   width: calc(100% - 272px);

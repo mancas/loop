@@ -293,6 +293,7 @@ loop.store.ActiveRoomStore = (function(mozL10n) {
       var roomToken = this._storeState.roomToken;
       loop.request("Rooms:PushSubscription", ["delete:" + roomToken, "update:" + roomToken]);
       loop.subscribe("Rooms:Delete:" + roomToken, this._handleRoomDelete.bind(this));
+      loop.subscribe("Rooms:Delete:" + roomToken, this._handleRoomDelete.bind(this));
       loop.subscribe("Rooms:Update:" + roomToken, this._handleRoomUpdate.bind(this));
       loop.subscribe("SocialProvidersChanged", this._onSocialShareUpdate);
     },
@@ -362,6 +363,7 @@ loop.store.ActiveRoomStore = (function(mozL10n) {
      *                   if Firefox handles the room or not.
      */
     fetchServerData: function(actionData) {
+      console.info(actionData);
       if (actionData.windowType !== "room") {
         // Nothing for us to do here, leave it to other stores.
         return Promise.resolve();
