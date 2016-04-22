@@ -825,6 +825,7 @@ loop.standaloneRoomViews = (function(mozL10n) {
         <div className="room-conversation-wrapper standalone-room-wrapper">
           <sharedToc.TableOfContentView
             activeRoomStore={this.props.activeRoomStore}
+            dispatcher={this.props.dispatcher}
             isDesktop={true}
             isScreenShareActive={displayScreenShare} />
           <sharedViews.ScreenShareView
