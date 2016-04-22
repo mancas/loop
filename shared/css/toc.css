@@ -1,6 +1,10 @@
+.standalone-room-wrapper .toc-wrapper {
+  width: calc(100% - 272px);
+}
+
 .toc-wrapper {
   display: flex;
-  width: calc(100% - 272px);
+  width: 100%;
   height: 100%;
   flex-direction: column;
   padding: 20px;
