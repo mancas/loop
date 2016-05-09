@@ -218,3 +218,42 @@
 .sidebar > .media-layout {
   padding: 0;
 }
+
+/* Room name modal */
+.room-name-modal-wrapper {
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  position: absolute;
+  z-index: 999;
+  background-color: rgba(0,0,0,.3);
+}
+
+.room-name-modal {
+  background: #f3f3f3;
+  width: 400px;
+  height: 200px;
+  transform: translate(-50%, -50%);
+  top: 50%;
+  left: 50%;
+  position: absolute;
+  padding: 20px 60px;
+}
+
+.room-name-modal > h1 {
+  font-size: 22px;
+  font-weight: bold;
+}
+
+.room-name-modal > input,
+.room-name-modal > button {
+  width: 100%;
+}
+
+.room-name-modal > button {
+  height: 34px;
+  line-height: 34px;
+  margin-top: 16px;
+}
+
