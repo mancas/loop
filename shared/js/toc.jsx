@@ -69,7 +69,7 @@ loop.shared.toc = (function(mozL10n) {
         "toc-wrapper": true,
         "receiving-screen-share": this.props.isScreenShareActive
       });
-console.info(this.state);
+
       return (
         <div className={cssClasses}>
           <RoomInfoBarView
@@ -311,6 +311,7 @@ console.info(this.state);
     }
   });
 
+  // XXX akita avoid showing the modal before the ToC has been loaded
   var RoomNameModalView = React.createClass({
     propTypes: {
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
