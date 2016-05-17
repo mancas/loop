@@ -25,6 +25,7 @@ loop.store.TextChatStore = (function() {
       "dataChannelsAvailable",
       "receivedTextChatMessage",
       "screenShareRequest",
+      "screenShareAllowed",
       "sendTextChatMessage",
       "updateRoomInfo",
       "updateRoomContext",
@@ -299,6 +300,18 @@ loop.store.TextChatStore = (function() {
         contentType: CHAT_CONTENT_TYPES.SCREEN_SHARE_REQUEST,
         message: "Your friend wants to share his screen with you."
       });
+    },
+
+    screenShareAllowed: function() {
+      var message = {
+        contentType: CHAT_CONTENT_TYPES.SCREEN_SHARE_REQUEST,
+        message: "Your friend has accepted your request",
+        extraData: {
+          screenShareAllowed: true
+        }
+      };
+
+      this._sdkDriver.sendTextChatMessage(message);
     }
   });
 

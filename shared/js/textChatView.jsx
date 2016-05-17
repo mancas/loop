@@ -87,6 +87,18 @@ loop.shared.views.chat = (function(mozL10n) {
         );
       }
 
+      if (this.props.contentType === CHAT_CONTENT_TYPES.SCREEN_SHARE_REQUEST) {
+        return (
+          <div className={classes}>
+            <ShareScreenRequestMessage
+              dispatcher={this.props.dispatcher}
+              extraData={this.props.extraData}
+              message={this.props.message} />
+            {this.props.showTimestamp ? this._renderTimestamp() : null}
+          </div>
+        );
+      }
+
       var linkClickHandler;
       if (loop.shared.utils.isDesktop()) {
         linkClickHandler = function(url) {
@@ -101,6 +113,60 @@ loop.shared.views.chat = (function(mozL10n) {
             rawText={this.props.message} />
           <span className="text-chat-arrow" />
           {this.props.showTimestamp ? this._renderTimestamp() : null}
+        </div>
+      );
+    }
+  });
+
+  var ShareScreenRequestMessage = React.createClass({
+    propTypes: {
+      dispatcher: React.PropTypes.instanceOf(loop.Dispatcher),
+      extraData: React.PropTypes.object,
+      message: React.PropTypes.string.isRequired
+    },
+
+    componentWillMount: function() {
+      if (this.props.extraData && this.props.extraData.screenShareAllowed) {
+        this.props.dispatcher.dispatch(new sharedActions.StartBrowserShare());
+        this.setState({
+          showButtons: false
+        });
+      }
+    },
+
+    getInitialState: function() {
+      return {
+        showButtons: true
+      };
+    },
+
+    onAccept: function() {
+      this.setState({
+          showButtons: false
+        });
+      this.props.dispatcher.dispatch(new sharedActions.ScreenShareAllowed());
+    },
+
+    onCancel: function() {
+      this.setState({
+          showButtons: false
+        });
+      this.props.dispatcher.dispatch(new sharedActions.ScreenShareDenied());
+    },
+
+    render: function() {
+      return (
+        <div className="screen-share-request">
+          <p>{this.props.message}</p>
+          {
+            this.state.showButtons ?
+            <div className="request-buttons">
+              <button
+              onClick={this.onAccept}>{"Acept"}</button>
+              <button
+                onClick={this.onCancel}>{"Cancel"}</button>
+            </div> : null
+          }
         </div>
       );
     }
