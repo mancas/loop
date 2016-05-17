@@ -826,6 +826,10 @@ loop.OTSdkDriver = (function() {
      * @param {String} message The message to send.
      */
     sendTextChatMessage: function(message) {
+      if (!this._publisherChannel) {
+        return;
+      }
+
       this._publisherChannel.send(JSON.stringify(message));
     },
 

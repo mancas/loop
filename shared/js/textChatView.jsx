@@ -230,6 +230,12 @@ loop.shared.views.chat = (function(mozL10n) {
                             url={entry.extraData.location} />
                         </div>
                       );
+                    case CHAT_CONTENT_TYPES.SCREEN_SHARE_REQUEST:
+                      return (
+                        <div className="context-url-view-wrapper" key={i}>
+                          {entry.message}
+                        </div>
+                      );
                     default:
                       console.error("Unsupported contentType",
                                     entry.contentType);

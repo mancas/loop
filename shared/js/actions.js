@@ -239,6 +239,24 @@ loop.shared.actions = (function() {
     }),
 
     /**
+     * Used to start a browser tab share.
+     */
+    ScreenShareRequest: Action.define("screenShareRequest", {
+    }),
+
+    /**
+     * Used to start a browser tab share.
+     */
+    ScreenShareAllowed: Action.define("screenShareAllowed", {
+    }),
+
+    /**
+     * Used to start a browser tab share.
+     */
+    ScreenShareDenied: Action.define("screenShareDenied", {
+    }),
+
+    /**
      * Used to mute or unmute a screen share.
      */
     ToggleBrowserSharing: Action.define("toggleBrowserSharing", {

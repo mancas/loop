@@ -119,7 +119,8 @@ if (inChrome) {
     CONTEXT: "chat-context",
     TEXT: "chat-text",
     CONTEXT_TILE: "context-tile",
-    NOTIFICATION: "chat-notification"
+    NOTIFICATION: "chat-notification",
+    SCREEN_SHARE_REQUEST: "screen-share-request"
   };
 
   var CURSOR_MESSAGE_TYPES = {

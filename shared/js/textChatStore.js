@@ -24,6 +24,7 @@ loop.store.TextChatStore = (function() {
     actions: [
       "dataChannelsAvailable",
       "receivedTextChatMessage",
+      "screenShareRequest",
       "sendTextChatMessage",
       "updateRoomInfo",
       "updateRoomContext",
@@ -140,7 +141,8 @@ loop.store.TextChatStore = (function() {
       // as this version doesn't support it.
       if (actionData.contentType !== CHAT_CONTENT_TYPES.TEXT &&
         actionData.contentType !== CHAT_CONTENT_TYPES.CONTEXT_TILE &&
-        actionData.contentType !== CHAT_CONTENT_TYPES.NOTIFICATION) {
+        actionData.contentType !== CHAT_CONTENT_TYPES.NOTIFICATION &&
+        actionData.contentType !== CHAT_CONTENT_TYPES.SCREEN_SHARE_REQUEST) {
         return;
       }
 
@@ -285,6 +287,18 @@ loop.store.TextChatStore = (function() {
       };
 
       this.sendTextChatMessage(msgData);
+    },
+
+    screenShareRequest: function() {
+      var message = {
+        contentType: CHAT_CONTENT_TYPES.SCREEN_SHARE_REQUEST,
+        message: "Waiting for your friend approval."
+      };
+      this._appendTextChatMessage(CHAT_MESSAGE_TYPES.SPECIAL, message);
+      this._sdkDriver.sendTextChatMessage({
+        contentType: CHAT_CONTENT_TYPES.SCREEN_SHARE_REQUEST,
+        message: "Your friend wants to share his screen with you."
+      });
     }
   });
 

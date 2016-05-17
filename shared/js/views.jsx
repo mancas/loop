@@ -317,8 +317,8 @@ loop.shared.views = (function(_, mozL10n) {
       if (this.props.disabled) {
         return;
       }
-console.info("MANU", this.props.muted);
-      var action = this.props.muted ? "StartBrowserShare" : "EndScreenShare";
+
+      var action = this.props.muted ? "ScreenShareRequest" : "EndScreenShare";
       this.props.dispatcher.dispatch(new sharedActions[action]());
     },
 
