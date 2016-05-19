@@ -1152,7 +1152,8 @@ loop.shared.views = (function(_, mozL10n) {
       }
 
       return (
-        <li className={cx(extraCSSClass)} onClick={this.props.onClick}>
+        <li className={cx(extraCSSClass)}
+            onClick={this.props.onClick} >
           {this.props.label}
         </li>
       );
@@ -1169,23 +1170,23 @@ loop.shared.views = (function(_, mozL10n) {
     ],
 
     getInitialState: function() {
-      return {
-        signedIn: !!loop.getStoredRequest(["GetUserProfile"]),
-        doNotDisturb: loop.getStoredRequest(["GetDoNotDisturb"])
-      };
+      return { doNotDisturb: false };
+    },
+
+    componentWillMount: function() {
+      loop.request("GetDoNotDisturb").then(result => {
+        this.setState({
+          doNotDisturb: result
+        });
+      });
     },
 
     componentWillUpdate: function(nextProps, nextState) {
       if (nextState.showMenu !== this.state.showMenu) {
-        loop.requestMulti(
-          ["GetUserProfile"],
-          ["GetDoNotDisturb"]
-        ).then(function(results) {
-          this.setState({
-            signedIn: !!results[0],
-            doNotDisturb: results[1]
+        loop.request("GetDoNotDisturb")
+          .then(result => {
+            this.setState({ doNotDisturb: result });
           });
-        }.bind(this));
       }
     },
 
@@ -1197,35 +1198,20 @@ loop.shared.views = (function(_, mozL10n) {
       // XXX
     },
 
-    handleClickAccountEntry: function() {
-      loop.request("OpenFxASettings");
-      this.closeWindow();
-    },
-
-    handleClickAuthEntry: function() {
-      if (this.state.signedIn) {
-        loop.request("LogoutFromFxA");
-        // Close the menu but leave the panel open
-        this.hideDropdownMenu();
-      } else {
-        loop.request("LoginToFxA");
-        // Close the panel, the menu will be closed by on blur listener of DropdownMenuMixin
-        this.closeWindow();
-      }
-    },
-
     handleHelpEntry: function(event) {
       event.preventDefault();
-      loop.request("GetLoopPref", "support_url").then(function(helloSupportUrl) {
-        loop.request("OpenURL", helloSupportUrl);
-        this.closeWindow();
-      }.bind(this));
+      loop.request("GetLoopPref", "support_url")
+        .then(function(helloSupportUrl) {
+          loop.request("OpenURL", helloSupportUrl);
+          this.closeWindow();
+        }.bind(this));
     },
 
     handleToggleNotifications: function() {
-      loop.request("GetDoNotDisturb").then(function(result) {
-        loop.request("SetDoNotDisturb", !result);
-      });
+      loop.request("GetDoNotDisturb")
+        .then(function(result) {
+          loop.request("SetDoNotDisturb", !result);
+        });
       this.hideDropdownMenu();
     },
 
@@ -1234,10 +1220,11 @@ loop.shared.views = (function(_, mozL10n) {
      */
     handleSubmitFeedback: function(event) {
       event.preventDefault();
-      loop.request("GetLoopPref", "feedback.manualFormURL").then(function(helloFeedbackUrl) {
-        loop.request("OpenURL", helloFeedbackUrl);
-        this.closeWindow();
-      }.bind(this));
+      loop.request("GetLoopPref", "feedback.manualFormURL")
+        .then(function(helloFeedbackUrl) {
+          loop.request("OpenURL", helloFeedbackUrl);
+          this.closeWindow();
+        }.bind(this));
     },
 
     openGettingStartedTour: function() {
@@ -1247,8 +1234,9 @@ loop.shared.views = (function(_, mozL10n) {
 
     render: function() {
       var cx = classNames;
-      var notificationsLabel = this.state.doNotDisturb ? "settings_menu_item_turnnotificationson" :
-                                                         "settings_menu_item_turnnotificationsoff";
+      var notificationsLabel = this.state.doNotDisturb ?
+                                  "settings_menu_item_turnnotificationson" :
+                                  "settings_menu_item_turnnotificationsoff";
 
       return (
         <div className="settings-menu dropdown">
@@ -1260,8 +1248,9 @@ loop.shared.views = (function(_, mozL10n) {
             "dropdown-menu": true,
             "hide": !this.state.showMenu
           })}>
-
-            <SettingsDropdownEntry label={"Change Room Name"} // {mozL10n.get("settings_mi_change_roomname")}
+            {/* Change_Room_Name option is hidden some times */}
+            <SettingsDropdownEntry displayed={loop.shared.utils.isDesktop()}
+                                   label={"Change Room Name"} // {mozL10n.get("settings_mi_change_roomname")}
                                    onClick={this.handleChangeRoomName} />
             <SettingsDropdownEntry extraCSSClass="entries-divider"
                                    label={"Change my Username"} // {mozL10n.get("settings_mi_change_username")}

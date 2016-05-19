@@ -214,7 +214,8 @@ loop.shared.toc = (function(mozL10n) {
       return (
         <div className="room-actions-buttons">
           <div className="room-action-add-url">
-            <button className="add-url" onClick={this.toggleAddUrlPanel} />
+            <button className="add-url"
+                    onClick={this.toggleAddUrlPanel} />
             {
               this.state.showAddUrlPanel ?
                 <AddUrlPanelView
@@ -222,7 +223,7 @@ loop.shared.toc = (function(mozL10n) {
             }
           </div>
           <div className="room-action-settings">
-            <button className="settings" />
+            <sharedViews.SettingsDropdown />
           </div>
         </div>
       );

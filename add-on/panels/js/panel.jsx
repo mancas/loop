@@ -1381,7 +1381,6 @@ loop.panel = _.extend(loop.panel || {}, (function(_, mozL10n) {
       ["GetLoopPref", "legal.privacy_url"],
       ["GetLoopPref", "remote.autostart"],
       ["GetUserProfile"],
-      ["GetDoNotDisturb"],
       ["GetHasEncryptionKey"],
       ["IsMultiProcessActive"]
     ];
