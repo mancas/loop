@@ -1189,8 +1189,12 @@ loop.shared.views = (function(_, mozL10n) {
       }
     },
 
-    handleClickSettingsEntry: function() {
-      // XXX to be implemented at the same time as unhiding the entry
+    handleChangeRoomName: function() {
+      // XXX
+    },
+
+    handleChangeUserName: function() {
+      // XXX
     },
 
     handleClickAccountEntry: function() {
@@ -1243,8 +1247,6 @@ loop.shared.views = (function(_, mozL10n) {
 
     render: function() {
       var cx = classNames;
-      var accountEntryCSSClass = this.state.signedIn ? "entry-settings-signout" :
-                                                       "entry-settings-signin";
       var notificationsLabel = this.state.doNotDisturb ? "settings_menu_item_turnnotificationson" :
                                                          "settings_menu_item_turnnotificationsoff";
 
@@ -1254,29 +1256,24 @@ loop.shared.views = (function(_, mozL10n) {
              onClick={this.toggleDropdownMenu}
              ref="menu-button"
              title={mozL10n.get("settings_menu_button_tooltip")} />
-          <ul className={cx({ "dropdown-menu": true, hide: !this.state.showMenu })}>
-            <SettingsDropdownEntry
-                extraCSSClass="entry-settings-notifications entries-divider"
-                label={mozL10n.get(notificationsLabel)}
-                onClick={this.handleToggleNotifications} />
-            <SettingsDropdownEntry
-                displayed={this.state.signedIn}
-                extraCSSClass="entry-settings-account"
-                label={mozL10n.get("settings_menu_item_account")}
-                onClick={this.handleClickAccountEntry} />
-            <SettingsDropdownEntry displayed={false}
-                                   label={mozL10n.get("settings_menu_item_settings")}
-                                   onClick={this.handleClickSettingsEntry} />
+          <ul className={cx({
+            "dropdown-menu": true,
+            "hide": !this.state.showMenu
+          })}>
+
+            <SettingsDropdownEntry label={"Change Room Name"} // {mozL10n.get("settings_mi_change_roomname")}
+                                   onClick={this.handleChangeRoomName} />
+            <SettingsDropdownEntry extraCSSClass="entries-divider"
+                                   label={"Change my Username"} // {mozL10n.get("settings_mi_change_username")}
+                                   onClick={this.handleChangeUserName} />
+            <SettingsDropdownEntry extraCSSClass="entry-settings-notifications entries-divider"
+                                   label={mozL10n.get(notificationsLabel)}
+                                   onClick={this.handleToggleNotifications} />
             <SettingsDropdownEntry label={mozL10n.get("tour_label")}
                                    onClick={this.openGettingStartedTour} />
             <SettingsDropdownEntry extraCSSClass="entry-settings-feedback"
                                    label={mozL10n.get("settings_menu_item_feedback")}
                                    onClick={this.handleSubmitFeedback} />
-            <SettingsDropdownEntry extraCSSClass={accountEntryCSSClass}
-                                   label={this.state.signedIn ?
-                                          mozL10n.get("settings_menu_item_signout") :
-                                          mozL10n.get("settings_menu_item_signin")}
-                                   onClick={this.handleClickAuthEntry} />
             <SettingsDropdownEntry extraCSSClass="entry-settings-help"
                                    label={mozL10n.get("help_label")}
                                    onClick={this.handleHelpEntry} />
