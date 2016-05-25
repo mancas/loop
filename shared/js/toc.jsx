@@ -15,6 +15,7 @@ loop.shared.toc = (function(mozL10n) {
   var sharedMixins = loop.shared.mixins;
   var sharedViews = loop.shared.views;
   var SCREEN_SHARE_STATES = loop.shared.utils.SCREEN_SHARE_STATES;
+  var utils = loop.shared.utils;
 
   // XXX akita: to store mixin
   // XXX akita: make activeRoomStore just handle the A/V connections.
@@ -81,6 +82,10 @@ loop.shared.toc = (function(mozL10n) {
             roomToken={this.state.roomToken} />
           <RoomContentView
             tiles={this.state.tiles} />
+          <RoomNameModalView
+            dispatcher={this.props.dispatcher}
+            roomHasName={!!this.state.roomName}
+            roomToken={this.state.roomToken} />
         </div>
       );
     }
@@ -492,8 +497,54 @@ loop.shared.toc = (function(mozL10n) {
     }
   });
 
+  var RoomNameModalView = React.createClass({
+    propTypes: {
+      dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
+      roomHasName: React.PropTypes.bool.isRequired,
+      roomToken: React.PropTypes.string.isRequired
+    },
+
+    getInitialState: function() {
+      return {
+        roomName: ""
+      };
+    },
+
+    onChange: function(event) {
+      this.setState({
+        roomName: event.target.value
+      });
+    },
+
+    saveRoomName: function() {
+      this.props.dispatcher.dispatch(
+        new sharedActions.UpdateRoomContext({
+          roomToken: this.props.roomToken,
+          newRoomName: this.state.roomName
+        })
+      );
+    },
+
+    render: function() {
+      if (!utils.isDesktop() || this.props.roomHasName) {
+        return null;
+      }
+
+      return (
+        <div className="room-name-modal-wrapper">
+          <div className="room-name-modal">
+            <h1>{"Set Room Name"}</h1>
+            <p>{"What is the purpose of this Room?"}</p>
+            <input onChange={this.onChange} placeholder="Type here" type="text" value={this.state.roomName} />
+            <button disabled={!this.state.roomName} onClick={this.saveRoomName}>{"Enter"}</button>
+          </div>
+        </div>
+      );
+    }
+  });
 
   return {
+    RoomNameModalView: RoomNameModalView,
     SidebarView: SidebarView,
     TableOfContentView: TableOfContentView
   };

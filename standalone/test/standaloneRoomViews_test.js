@@ -1470,6 +1470,26 @@ describe("loop.standaloneRoomViews", function() {
               null);
           });
       });
+
+      describe("Room name modal", function() {
+        it("should render the room name modal if the room has no name", function() {
+          activeRoomStore.setStoreState({
+            roomName: null
+          });
+
+          expect(ReactDOM.findDOMNode(view).querySelector(".room-name-modal-wrapper"))
+            .not.eql(null);
+        });
+
+        it("should not render the room name modal if the room has a name", function() {
+          activeRoomStore.setStoreState({
+            roomName: "fakeName"
+          });
+
+          expect(ReactDOM.findDOMNode(view).querySelector(".room-name-modal-wrapper"))
+            .eql(null);
+        });
+      });
     });
   });
 
