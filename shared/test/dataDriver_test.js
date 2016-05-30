@@ -480,6 +480,10 @@ describe("loop.DataDriver", () => {
   });
 
   describe("#_processRecord.chat", () => {
+    beforeEach(function() {
+      sandbox.stub(console, "error");
+    });
+
     it("should dispatch `ReceivedTextChatMessage` for chat record", () => {
       driver._processRecord("chat!01234567abcdefghijkl", {
         timestamp: 1234567890123,
@@ -499,9 +503,48 @@ describe("loop.DataDriver", () => {
           sentTimestamp: "2016-05-10T18:26:58.235Z"
         }));
     });
+
+    it("should throw an exception if timestamp isn't valid", () => {
+      driver._processRecord("chat!01234567abcdefghijkl", {
+        timestamp: "abc",
+        value: {
+          contentType: CHAT_CONTENT_TYPES.TEXT,
+          message: "Are you there?",
+          sentTimestamp: "2016-05-10T18:26:58.235Z"
+        }
+      });
+
+      sinon.assert.calledOnce(console.error);
+    });
+
+    it("should throw an exception if value isn't valid", () => {
+      driver._processRecord("chat!01234567abcdefghijkl", {
+        timestamp: 1234567890123,
+        value: 12412
+      });
+
+      sinon.assert.calledOnce(console.error);
+    });
+
+    it("should throw an exception if timestamp is NaN", () => {
+      driver._processRecord("chat!01234567abcdefghijkl", {
+        timestamp: NaN,
+        value: {
+          contentType: CHAT_CONTENT_TYPES.TEXT,
+          message: "Are you there?",
+          sentTimestamp: "2016-05-10T18:26:58.235Z"
+        }
+      });
+
+      sinon.assert.calledOnce(console.error);
+    });
   });
 
   describe("#_processRecord.participant", () => {
+    beforeEach(function() {
+      sandbox.stub(console, "error");
+    });
+
     it("should dispatch `UpdatedParticipant` for participant record", () => {
       driver._processRecord("participant!theUserId", {
         timestamp: 1234567890123,
@@ -517,9 +560,22 @@ describe("loop.DataDriver", () => {
           userId: "theUserId"
         }));
     });
+
+    it("should throw an exception if value isn't valid", () => {
+      driver._processRecord("participant!theUserId", {
+        timestamp: 1234567890123,
+        value: 1234
+      });
+
+      sinon.assert.calledOnce(console.error);
+    });
   });
 
   describe("#_processRecord.presence", () => {
+    beforeEach(function() {
+      sandbox.stub(console, "error");
+    });
+
     it("should dispatch `UpdatedPresence` for presence record", () => {
       let now = 1234567890123;
       clock.tick(now);
@@ -538,6 +594,26 @@ describe("loop.DataDriver", () => {
           userId: "theUserId"
         }));
     });
+
+    it("should throw an exception if timestamp isn't valid", () => {
+      driver._processRecord("presence!theUserId", {
+        timestamp: "abc",
+        value: {
+          isHere: true
+        }
+      });
+
+      sinon.assert.calledOnce(console.error);
+    });
+
+    it("should throw an exception if value isn't valid", () => {
+      driver._processRecord("presence!theUserId", {
+        timestamp: 1234567890123,
+        value: 1234
+      });
+
+      sinon.assert.calledOnce(console.error);
+    });
   });
 
   describe("#_processRecords", () => {
@@ -552,7 +628,8 @@ describe("loop.DataDriver", () => {
           }
         },
         "meta!lastConnect": {
-          timestamp: 2345678901234
+          timestamp: 2345678901234,
+          value: {}
         }
       });
 

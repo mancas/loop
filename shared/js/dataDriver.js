@@ -8,6 +8,11 @@ loop.DataDriver = function() {
 
   let { actions } = loop.shared;
 
+  const DEFAULT_VALIDATOR_SCHEMA = {
+    timestamp: Number,
+    value: Object
+  };
+
   /**
    * Generate an id based on a time. Declared outside of the class to use
    * locally scoped variables.
@@ -391,39 +396,47 @@ loop.DataDriver = function() {
      *  - {Mixed}  value     Stored value for the record.
      */
     _processRecord(key, data) {
-      let dispatchAction;
-      let dispatchExtra = {};
-      // XXX akita bug 1274130: Validate data/key/timestamp before processing.
-      let [, type, id] = key.match(/^([^!]+)!(.+)$/);
-      switch (type) {
-        case "chat":
-          dispatchAction = "ReceivedTextChatMessage";
-          dispatchExtra = {
-            receivedTimestamp: new Date(data.timestamp).toISOString()
-          };
-          break;
+      let type, id;
+      try {
+        [, type, id] = key.match(/^([^!]+)!(.+)$/);
+        // First validates data, if no exception is thrown we can dispatch the actions
+        this._validateData(type, data);
 
-        case "participant":
-          dispatchAction = "UpdatedParticipant";
-          dispatchExtra = {
-            userId: id
-          };
-          break;
+        let dispatchAction;
+        let dispatchExtra = {};
 
-        case "presence":
-          dispatchAction = "UpdatedPresence";
-          dispatchExtra = {
-            pingedAgo: this.getServerTime() - data.timestamp,
-            userId: id
-          };
-          break;
-      }
+        switch (type) {
+          case "chat":
+            dispatchAction = "ReceivedTextChatMessage";
+            dispatchExtra = {
+              receivedTimestamp: new Date(data.timestamp).toISOString()
+            };
+            break;
 
-      // Dispatch the desired action with an object that combines the record's
-      // value and any additional keys without modifying the data parameter.
-      if (dispatchAction) {
-        this._dispatcher.dispatch(new actions[dispatchAction](Object.assign({},
-          data.value, dispatchExtra)));
+          case "participant":
+            dispatchAction = "UpdatedParticipant";
+            dispatchExtra = {
+              userId: id
+            };
+            break;
+
+          case "presence":
+            dispatchAction = "UpdatedPresence";
+            dispatchExtra = {
+              pingedAgo: this.getServerTime() - data.timestamp,
+              userId: id
+            };
+            break;
+        }
+
+        // Dispatch the desired action with an object that combines the record's
+        // value and any additional keys without modifying the data parameter.
+        if (dispatchAction) {
+          this._dispatcher.dispatch(new actions[dispatchAction](Object.assign({},
+            data.value, dispatchExtra)));
+        }
+      } catch (exception) {
+        console.error("Validate record error: ", exception);
       }
     }
 
@@ -467,6 +480,10 @@ loop.DataDriver = function() {
         };
         request.send(JSON.stringify(body) || null);
       });
+    }
+
+    _validateData(type, data) {
+      new loop.validate.Validator(DEFAULT_VALIDATOR_SCHEMA).validate(data);
     }
   };
 }();
