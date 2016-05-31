@@ -145,6 +145,13 @@ loop.shared.actions = (function() {
     }),
 
     /**
+     * Notifies that a tile has been removed.
+     */
+    DeletedTile: Action.define("deletedTile", {
+      deletedTime: Number
+    }),
+
+    /**
      *  Used to send cursor data to the other peer
      */
     SendCursorData: Action.define("sendCursorData", {
