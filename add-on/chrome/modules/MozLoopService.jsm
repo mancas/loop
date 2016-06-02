@@ -2057,11 +2057,6 @@ this.MozLoopService = {
     win.openUILinkIn(Services.urlFormatter.formatURL(url), "tab");
   },
 
-  addURL: function() {
-    let win = Services.wm.getMostRecentWindow("navigator:browser");
-    log.info(win.gBrowser.selectedTab);
-  },
-
   /**
    * Performs a hawk based request to the loop server.
    *

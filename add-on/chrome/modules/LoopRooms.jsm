@@ -1019,12 +1019,12 @@ var LoopRoomsInternal = {
     }
     if (roomData.urls && roomData.urls.length) {
       // For now we only support adding one URL to the room context.
-      let context = roomData.urls[0];
-      room.decryptedContext.urls = [context];
+      let context = roomData.urls;
+      room.decryptedContext.urls = context;
 
       // Record the url for reporting if enabled.
       if (Services.prefs.getBoolPref("loop.logDomains")) {
-        this._recordUrl(roomToken, context.location);
+        this._recordUrl(roomToken, context[0].location);
       }
     }
 

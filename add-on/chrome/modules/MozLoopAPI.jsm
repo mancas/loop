@@ -214,11 +214,6 @@ const kMessageHandlers = {
     reply();
   },
 
-  AddURL: function(message, reply) {
-    MozLoopService.addURL();
-    reply();
-  },
-
   /**
    * Shows the click event on the remote cursor.
    *

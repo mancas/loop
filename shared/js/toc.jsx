@@ -45,8 +45,8 @@ loop.shared.toc = (function(mozL10n) {
       if (!newState.roomContextUrls) {
         return;
       }
-
-      var tiles = [newState.roomContextUrls[0]];
+console.info(newState);
+      var tiles = newState.roomContextUrls;
       newState.tiles = tiles;
       this.setState(newState);
     },
@@ -486,6 +486,7 @@ loop.shared.toc = (function(mozL10n) {
             video={this.props.video} />
           <loop.shared.views.chat.TextChatView
             dispatcher={this.props.dispatcher}
+            roomToken={this.state.roomToken}
             showInitialContext={true} />
         </div>
       );
