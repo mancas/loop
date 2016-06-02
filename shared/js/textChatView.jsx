@@ -381,6 +381,11 @@ loop.shared.views.chat = (function(mozL10n) {
       this.setState({ messageDetail: "" });
     },
 
+    handleAddURL: function() {
+      console.info("SIDEBAR ADD URL CALLED");
+      loop.request("AddURL");
+    },
+
     render: function() {
       if (!this.props.textChatEnabled) {
         return null;
@@ -396,6 +401,10 @@ loop.shared.views.chat = (function(mozL10n) {
               type="text"
               value={this.state.messageDetail} />
           </form>
+          <button
+            className="btn add-url-wrapper"
+            onClick={this.handleAddURL}
+            title={"Add url to ToC"}></button>
         </div>
       );
     }
