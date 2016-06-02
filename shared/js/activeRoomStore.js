@@ -272,7 +272,8 @@ loop.store.ActiveRoomStore = (function(mozL10n) {
         "toggleBrowserSharing",
         "connectionStatus",
         "mediaConnected",
-        "videoScreenStreamChanged"
+        "videoScreenStreamChanged",
+        "updateRoomContext"
       ];
       // Register actions that are only used on Desktop.
       if (this._isDesktop) {
@@ -1263,6 +1264,73 @@ loop.store.ActiveRoomStore = (function(mozL10n) {
       }
 
       return false;
+    },
+
+    /**
+     * Updates the context data attached to a room.
+     *
+     * @param {sharedActions.UpdateRoomContext} actionData
+     */
+    updateRoomContext: function(actionData) {
+      loop.request("Rooms:Get", actionData.roomToken).then(function(result) {
+        if (result.isError) {
+          this.dispatchAction(new sharedActions.UpdateRoomContextError({
+            error: result
+          }));
+          return;
+        }
+
+        var roomData = {};
+        var context = result.decryptedContext;
+        var oldRoomName = context.roomName;
+        var newRoomName = (actionData.newRoomName || "").trim();
+        if (newRoomName && oldRoomName !== newRoomName) {
+          roomData.roomName = newRoomName;
+        }
+        var oldRoomURLs = context.urls;
+        // Since we want to prevent storing falsy (i.e. empty) values for context
+        // data, there's no need to send that to the server as an update.
+        var newRoomURL = loop.shared.utils.stripFalsyValues({
+          location: (actionData.newRoomURL || "").trim(),
+          thumbnail: (actionData.newRoomThumbnail || "").trim(),
+          description: (actionData.newRoomDescription || "").trim()
+        });
+
+        var isValidURL = false;
+        try {
+          isValidURL = new URL(newRoomURL.location);
+        } catch (ex) {
+          // URL may throw, default to false;
+        }
+
+        if (isValidURL) {
+          oldRoomURLs.push(newRoomURL);
+          roomData.urls = oldRoomURLs;
+        }
+        // TODO: there currently is no clear UX defined on what to do when all
+        // context data was cleared, e.g. when diff.removed contains all the
+        // context properties. Until then, we can't deal with context removal here.
+
+        // When no properties have been set on the roomData object, there's nothing
+        // to save.
+        if (!Object.getOwnPropertyNames(roomData).length) {
+          // Ensure async actions so that we get separate setStoreState events
+          // that React components won't miss.
+          setTimeout(function() {
+            this.dispatchAction(new sharedActions.UpdateRoomContextDone());
+          }.bind(this), 0);
+          return;
+        }
+
+        this.setStoreState({ error: null });
+        loop.request("Rooms:Update", actionData.roomToken, roomData).then(function(result2) {
+          var isError = (result2 && result2.isError);
+          var action = isError ?
+            new sharedActions.UpdateRoomContextError({ error: result2 }) :
+            new sharedActions.UpdateRoomContextDone();
+          this.dispatchAction(action);
+        }.bind(this));
+      }.bind(this));
     }
   });
 

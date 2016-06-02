@@ -332,6 +332,7 @@ loop.shared.views.chat = (function(mozL10n) {
 
     propTypes: {
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
+      roomToken: React.PropTypes.string.isRequired,
       showPlaceholder: React.PropTypes.bool.isRequired,
       textChatEnabled: React.PropTypes.bool.isRequired
     },
@@ -381,6 +382,21 @@ loop.shared.views.chat = (function(mozL10n) {
       this.setState({ messageDetail: "" });
     },
 
+    handleAddURL: function() {
+      console.info("SIDEBAR ADD URL CALLED");
+      loop.request("GetSelectedTabMetadata").then(metadata => {
+        var previewImage = metadata.favicon || "";
+        var description = metadata.title || metadata.description;
+        var url = metadata.url;
+        this.props.dispatcher.dispatch(new sharedActions.UpdateRoomContext({
+          roomToken: this.props.roomToken,
+          newRoomDescription: description,
+          newRoomThumbnail: previewImage,
+          newRoomURL: url
+        }));
+      });
+    },
+
     render: function() {
       if (!this.props.textChatEnabled) {
         return null;
@@ -396,6 +412,10 @@ loop.shared.views.chat = (function(mozL10n) {
               type="text"
               value={this.state.messageDetail} />
           </form>
+          <button
+            className="btn add-url-wrapper"
+            onClick={this.handleAddURL}
+            title={"Add url to ToC"}></button>
         </div>
       );
     }
@@ -416,6 +436,7 @@ loop.shared.views.chat = (function(mozL10n) {
 
     propTypes: {
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
+      roomToken: React.PropTypes.string.isRequired,
       showInitialContext: React.PropTypes.bool.isRequired
     },
 
@@ -455,6 +476,7 @@ loop.shared.views.chat = (function(mozL10n) {
             showInitialContext={this.props.showInitialContext} />
           <TextChatInputView
             dispatcher={this.props.dispatcher}
+            roomToken={this.props.roomToken}
             showPlaceholder={!hasSentMessages}
             textChatEnabled={this.state.textChatEnabled} />
         </div>

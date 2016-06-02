@@ -495,11 +495,16 @@ html[dir="rtl"] .text-chat-entry.received .speech-bubble-arrow {
 }
 
 .text-chat-box {
+  display: flex;
   margin: auto;
   flex: 0 0 auto;
   max-height: 40px;
   min-height: 40px;
   width: 100%;
+}
+
+.text-chat-box > form {
+  flex-grow: 1;
 }
 
 .text-chat-box > form > input {
@@ -539,6 +544,26 @@ html[dir="rtl"] .text-chat-entry.received .speech-bubble-arrow {
 /* turn the visible border blue as a visual indicator of focus */
 .text-chat-box > form > input:focus {
   border-top: 1px solid #66c9f2;
+}
+
+.text-chat-box > .add-url-wrapper {
+  width: 40px;
+  height: 40px;
+  background-color: inherit;
+  border: solid 1px #ebebeb;
+  padding: initial;
+}
+
+.text-chat-box > .add-url-wrapper:hover {
+  background-color: rgba(51, 51, 51, 0.1);
+}
+
+.text-chat-box > .add-url-wrapper:after {
+  content: url("../img/icons-16x16.svg#add");
+}
+
+.text-chat-box > .add-url-wrapper:hover:after {
+  content: url("../img/icons-16x16.svg#add-hover");
 }
 
 /*------------------------------------*\
