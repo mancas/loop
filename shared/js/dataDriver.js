@@ -116,6 +116,17 @@ loop.DataDriver = function() {
       this.update("presence", userId, Object.assign({ isHere }, presence));
     }
 
+    /**
+     * Delete the specified tile record.
+     *
+     * @param {String}  tileId   The id to associate with stored tile.
+     */
+    deleteTileRecord(tileId) {
+      // XXX akita bug 1276095: Verify tileId is a valid firebase id.
+      this.update("tile", tileId);
+    }
+
+
     /** **************** **
      *** Action Handler ***
      ** **************** **/
@@ -416,6 +427,16 @@ loop.DataDriver = function() {
             pingTime: data.timestamp,
             userId: id
           };
+          break;
+        case "tile":
+          if (data.value) {
+            // TODO seems that the tile has been created
+          } else {
+            dispatchAction = "DeletedTile";
+            dispatchExtra = {
+              deletedTimestamp: data.timestamp
+            };
+          }
           break;
       }
 
