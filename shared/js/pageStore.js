@@ -51,8 +51,14 @@ loop.store.PageStore = function() {
      */
     addPage(actionData) {
       let pageRecord = {
-        userId: actionData.userId,
-        metadata: actionData.metadata
+        userId: this._currentUserId,
+        metadata: {
+          description: actionData.description,
+          favicon_url: actionData.favicon_url,
+          images: actionData.images,
+          title: actionData.title,
+          url: actionData.url
+        }
       };
 
       this._dataDriver.addPage(pageRecord);

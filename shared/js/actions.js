@@ -161,8 +161,11 @@ loop.shared.actions = (function() {
      * Used to add a page to the current room
      */
     AddPage: Action.define("addPage", {
-      userId: String,
-      metadata: Object
+      description: String,
+      favicon_url: String,
+      images: Object,
+      title: String,
+      url: String
     }),
 
     /**
