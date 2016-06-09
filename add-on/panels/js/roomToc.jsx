@@ -45,6 +45,8 @@ loop.roomToc = (function(mozL10n) {
 
       let snackbarStore = new loop.store.SnackbarStore(dispatcher);
 
+      let pageStore = new loop.store.PageStore(dispatcher, { dataDriver });
+
       loop.store.StoreMixin.register({
         participantStore,
         serverConnectionStore,
@@ -58,6 +60,7 @@ loop.roomToc = (function(mozL10n) {
       ReactDOM.render(<tocViews.TableOfContentView
                         dispatcher={dispatcher}
                         isScreenShareActive={false}
+                        pageStore={pageStore}
                         participantStore={participantStore}
                         snackbarStore={snackbarStore} />, document.querySelector("#main"));
 

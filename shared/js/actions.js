@@ -158,6 +158,14 @@ loop.shared.actions = (function() {
     }),
 
     /**
+     * Used to add a page to the current room
+     */
+    AddPage: Action.define("addPage", {
+      userId: String,
+      metadata: Object
+    }),
+
+    /**
      * Notifies that a tile has been received from the other peer.
      */
     AddedPage: Action.define("addedPage", {
@@ -165,6 +173,13 @@ loop.shared.actions = (function() {
       title: String,
       url: String
       // metadata: Object (optional)
+    }),
+
+    /**
+     * Used to delete a page of the current room
+     */
+    DeletePage: Action.define("deletePage", {
+      pageId: String
     }),
 
     /**
