@@ -610,8 +610,9 @@ loop.shared.toc = (function(mozL10n) {
 
   return {
     AddUrlPanelView: AddUrlPanelView,
-    SidebarView: SidebarView,
+    PageView: PageView,
     RoomPresenceView: RoomPresenceView,
+    SidebarView: SidebarView,
     TableOfContentView: TableOfContentView
   };
 })(navigator.mozL10n || document.mozL10n);

@@ -87,16 +87,19 @@ loop.store.PageStore = function(mozL10n) {
     },
 
     /**
-     * Handle DeletedPage action by updating the stroe state.
+     * Handle DeletedPage action by updating the store state.
      */
     deletedPage(actionData) {
       let pages = this._storeState.pages;
+      let pagesLength = pages.length;
       pages = pages.filter(page => page.id !== actionData.pageId);
       this.setStoreState({ pages });
 
-      this.dispatchAction(new sharedActions.ShowSnackbar({
-        label: mozL10n.get("snackbar_page_deleted")
-      }));
+      if (pagesLength !== pages.length) {
+        this.dispatchAction(new sharedActions.ShowSnackbar({
+          label: mozL10n.get("snackbar_page_deleted")
+        }));
+      }
     }
   });
 
