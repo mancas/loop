@@ -5,8 +5,10 @@
 var loop = loop || {};
 loop.store = loop.store || {};
 
-loop.store.PageStore = function() {
+loop.store.PageStore = function(mozL10n) {
   "use strict";
+
+  var sharedActions = loop.shared.actions;
 
   /**
    * Page store.
@@ -91,8 +93,12 @@ loop.store.PageStore = function() {
       let pages = this._storeState.pages;
       pages = pages.filter(page => page.id !== actionData.pageId);
       this.setStoreState({ pages });
+
+      this.dispatchAction(new sharedActions.ShowSnackbar({
+        label: mozL10n.get("snackbar_page_deleted")
+      }));
     }
   });
 
   return PageStore;
-}();
+}(navigator.mozL10n || document.mozL10n);
