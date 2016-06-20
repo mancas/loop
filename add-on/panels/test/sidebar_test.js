@@ -8,7 +8,7 @@ describe("loop.sidebar", function() {
   var expect = chai.expect;
   var TestUtils = React.addons.TestUtils;
   var fakeWindow, sandbox, setLoopPrefStub, dispatcher, requestStubs,
-    activeRoomStore, remoteCursorStore, textChatStore;
+    activeRoomStore, remoteCursorStore, textChatStore, participantStore;
   var ROOM_STATES = loop.store.ROOM_STATES;
 
   beforeEach(function() {
@@ -89,6 +89,10 @@ describe("loop.sidebar", function() {
     remoteCursorStore = new loop.store.RemoteCursorStore(dispatcher, {
       sdkDriver: {}
     });
+
+    participantStore = new loop.store.ParticipantStore(dispatcher, {
+      dataDriver: {}
+    });
   });
 
   afterEach(function() {
@@ -166,7 +170,8 @@ describe("loop.sidebar", function() {
       return TestUtils.renderIntoDocument(
         React.createElement(loop.sidebar.SidebarControllerView, {
           cursorStore: remoteCursorStore,
-          dispatcher: dispatcher
+          dispatcher: dispatcher,
+          participantStore: participantStore
         }));
     }
 
@@ -279,7 +284,8 @@ describe("loop.sidebar", function() {
     function mountTestComponent() {
       return TestUtils.renderIntoDocument(
         React.createElement(loop.sidebar.DesktopSidebarView, {
-          dispatcher: dispatcher
+          dispatcher: dispatcher,
+          participantStore: participantStore
         }));
     }
 

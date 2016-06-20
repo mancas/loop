@@ -115,8 +115,6 @@ loop.shared.toc = (function(mozL10n) {
               label={this.state.roomName}
               onEditionComplete={this.exitEditMode} />
           </div>
-          <RoomPresenceView
-            participantStore={this.props.participantStore} />
           <RoomActionsView
             dispatcher={this.props.dispatcher} />
         </div>
@@ -364,6 +362,7 @@ loop.shared.toc = (function(mozL10n) {
       leaveRoom: React.PropTypes.func.isRequired,
       // The poster URLs are for UI-showcase testing and development
       localPosterUrl: React.PropTypes.string,
+      participantStore: React.PropTypes.instanceOf(loop.store.ParticipantStore).isRequired,
       remotePosterUrl: React.PropTypes.string,
       roomState: React.PropTypes.string,
       video: React.PropTypes.object.isRequired
@@ -536,25 +535,93 @@ loop.shared.toc = (function(mozL10n) {
     render: function() {
       return (
         <div className="sidebar-wrapper">
-          <sharedViews.MediaLayoutView
+          <RoomControlsView
             audio={this.props.audio}
+            dispatcher={this.props.dispatcher}
+            participantStore={this.props.participantStore}
+            roomState={this.state.roomState}
+            screen={{ enabled: this.state.screenSharingState !== SCREEN_SHARE_STATES.INACTIVE }}
+            video={this.props.video} />
+          <sharedViews.MediaLayoutView
             dispatcher={this.props.dispatcher}
             isLocalLoading={this._isLocalLoading()}
             isRemoteLoading={this._isRemoteLoading()}
-            leaveRoom={this.props.leaveRoom}
             localPosterUrl={this.props.localPosterUrl}
             localSrcMediaElement={this.state.localSrcMediaElement}
             localVideoMuted={this.state.videoMuted}
             matchMedia={this.state.matchMedia || window.matchMedia.bind(window)}
+            participantStore={this.props.participantStore}
             remotePosterUrl={this.props.remotePosterUrl}
             remoteSrcMediaElement={this.state.remoteSrcMediaElement}
             renderRemoteVideo={this.shouldRenderRemoteVideo()}
-            screen={{ enabled: this.state.screenSharingState !== SCREEN_SHARE_STATES.INACTIVE }}
-            showMediaWait={this.state.roomState === ROOM_STATES.MEDIA_WAIT}
-            video={this.props.video} />
+            showMediaWait={this.state.roomState === ROOM_STATES.MEDIA_WAIT} />
           <loop.shared.views.chat.TextChatView
             dispatcher={this.props.dispatcher}
             showInitialContext={true} />
+        </div>
+      );
+    }
+  });
+
+  var RoomControlsView = React.createClass({
+    statics: {
+      OPEN_DELAY: 200,
+      CLOSE_DELAY: 350
+    },
+
+    propTypes: {
+      audio: React.PropTypes.object.isRequired,
+      dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
+      participantStore: React.PropTypes.instanceOf(loop.store.ParticipantStore).isRequired,
+      roomState: React.PropTypes.string.isRequired,
+      screen: React.PropTypes.object.isRequired,
+      video: React.PropTypes.object.isRequired
+    },
+
+    getInitialState: function() {
+      return {
+        showRoomControls: this.props.roomState === ROOM_STATES.HAS_PARTICIPANTS
+      };
+    },
+
+    componentWillReceiveProps: function(nextProps) {
+      if (this.props.roomState !== nextProps.roomState) {
+        // Let's render the controls if needed
+        if (nextProps.roomState === ROOM_STATES.HAS_PARTICIPANTS) {
+          this.setState({ showRoomControls: true });
+        } else {
+          // If the controls were already rendered, let's animate them and
+          // update the state after the animation
+          ReactDOM.findDOMNode(this).classList.remove("rooms-controls-open");
+          setTimeout(() => {
+            this.setState({ showRoomControls: false });
+          }, this.constructor.CLOSE_DELAY);
+        }
+      }
+    },
+
+    componentDidUpdate: function(prevProps, prevState) {
+      if (this.state.showRoomControls !== prevState.showRoomControls) {
+        setTimeout(() => {
+          ReactDOM.findDOMNode(this).classList.add("rooms-controls-open");
+        }, this.constructor.OPEN_DELAY);
+      }
+    },
+
+    render: function() {
+      if (!this.state.showRoomControls) {
+        return null;
+      }
+
+      return (
+        <div className="room-controls-wrapper">
+          <RoomPresenceView
+            participantStore={this.props.participantStore} />
+          <sharedViews.MediaButtonsView
+            audio={this.props.audio}
+            dispatcher={this.props.dispatcher}
+            screen={this.props.screen}
+            video={this.props.video} />
         </div>
       );
     }
