@@ -470,52 +470,6 @@ loop.panel = _.extend(loop.panel || {}, (function(_, mozL10n) {
     }
   });
 
-  var RoomEntryContextItem = React.createClass({
-    mixins: [loop.shared.mixins.WindowCloseMixin],
-
-    propTypes: {
-      roomUrls: React.PropTypes.array
-    },
-
-    handleClick: function(event) {
-      event.stopPropagation();
-      event.preventDefault();
-      if (event.currentTarget.href) {
-        loop.request("OpenURL", event.currentTarget.href);
-        this.closeWindow();
-      }
-    },
-
-    _renderDefaultIcon: function() {
-      return (
-        <div className="room-entry-context-item">
-          <img src="shared/img/icons-16x16.svg#globe" />
-        </div>
-      );
-    },
-
-    _renderIcon: function(roomUrl) {
-      return (
-        <div className="room-entry-context-item">
-          <a href={roomUrl.location}
-            onClick={this.handleClick}
-            title={roomUrl.description}>
-            <img src={roomUrl.thumbnail || "shared/img/icons-16x16.svg#globe"} />
-          </a>
-        </div>
-      );
-    },
-
-    render: function() {
-      var roomUrl = this.props.roomUrls && this.props.roomUrls[0];
-      if (roomUrl && roomUrl.location) {
-        return this._renderIcon(roomUrl);
-      }
-
-      return this._renderDefaultIcon();
-    }
-  });
-
   /**
    *  Aux function to retrieve the name of a room
    */
@@ -634,30 +588,45 @@ loop.panel = _.extend(loop.panel || {}, (function(_, mozL10n) {
       }
     },
 
+    cancelEditMode: function() {
+      this.setState({ editMode: false });
+    },
+
+    renderEditModeIfNeeded: function() {
+      if (!this.state.editMode) {
+        var roomTitle = _getRoomTitle(this.props.room);
+        return (
+          <h2>{roomTitle}</h2>
+        );
+      }
+
+      return (
+        <div className="edit-room-name-wrapper">
+          <input
+              className="edit-room-name-input"
+              onBlur={this.exitEditMode}
+              onChange={this.handleEditInputChange}
+              onKeyDown={this.handleKeyDown}
+              type="text"
+              value={this.state.newRoomName} />
+          <button onClick={this.cancelEditMode}>{mozL10n.get("cancel_edit_mode")}</button>
+        </div>
+      );
+    },
+
     render: function() {
       var roomClasses = classNames({
         "room-entry": true,
         "room-active": this._isActive(),
         "room-opened": this.props.isOpenedRoom
       });
-      var roomTitle = _getRoomTitle(this.props.room);
 
       return (
         <div className={roomClasses}
           onClick={this.props.isOpenedRoom ? null : this.handleClickEntry}
           onMouseLeave={this.props.isOpenedRoom ? null : this._handleMouseOut}
           ref="roomEntry">
-          <RoomEntryContextItem
-            roomUrls={this.props.room.decryptedContext.urls} />
-          {!this.state.editMode ?
-            <h2>{roomTitle}</h2> :
-            <input
-              className="edit-room-input"
-              onBlur={this.exitEditMode}
-              onChange={this.handleEditInputChange}
-              onKeyDown={this.handleKeyDown}
-              type="text"
-              value={this.state.newRoomName} />}
+          {this.renderEditModeIfNeeded()}
           {this.props.isOpenedRoom || this.state.editMode ? null :
             <RoomEntryContextButtons
               dispatcher={this.props.dispatcher}

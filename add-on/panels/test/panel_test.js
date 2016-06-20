@@ -908,64 +908,6 @@ describe("loop.panel", function() {
       });
     });
 
-    describe("Context Indicator", function() {
-      var roomEntry;
-
-      function mountEntryForContext() {
-        return mountRoomEntry({
-          isOpenedRoom: false,
-          room: new loop.store.Room(roomData)
-        });
-      }
-
-      it("should display a default context indicator if the room doesn't have any", function() {
-        roomEntry = mountEntryForContext();
-
-        expect(ReactDOM.findDOMNode(roomEntry).querySelector(".room-entry-context-item")).not.eql(null);
-      });
-
-      it("should a context indicator if the room specifies context", function() {
-        roomData.decryptedContext.urls = [{
-          description: "invalid entry",
-          location: "http://invalid",
-          thumbnail: "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
-        }];
-
-        roomEntry = mountEntryForContext();
-
-        expect(ReactDOM.findDOMNode(roomEntry).querySelector(".room-entry-context-item")).not.eql(null);
-      });
-
-      it("should call mozLoop.openURL to open a new url", function() {
-        roomData.decryptedContext.urls = [{
-          description: "invalid entry",
-          location: "http://invalid/",
-          thumbnail: "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
-        }];
-
-        roomEntry = mountEntryForContext();
-
-        TestUtils.Simulate.click(ReactDOM.findDOMNode(roomEntry).querySelector("a"));
-
-        sinon.assert.calledOnce(requestStubs.OpenURL);
-        sinon.assert.calledWithExactly(requestStubs.OpenURL, "http://invalid/");
-      });
-
-      it("should call close the panel after opening a url", function() {
-        roomData.decryptedContext.urls = [{
-          description: "invalid entry",
-          location: "http://invalid/",
-          thumbnail: "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
-        }];
-
-        roomEntry = mountEntryForContext();
-
-        TestUtils.Simulate.click(ReactDOM.findDOMNode(roomEntry).querySelector("a"));
-
-        sinon.assert.calledOnce(fakeWindow.close);
-      });
-    });
-
     describe("Editing Room Name", function() {
       var roomEntry;
 

@@ -333,9 +333,7 @@ html[dir="rtl"] .rename-container > .input-group {
 .room-list > .room-entry > h2 {
   display: inline-block;
   vertical-align: middle;
-  /* See .room-entry-context-item for the margin/size reductions.
-   * An extra 16px to make space for the edit button. */
-  width: calc(100% - 1rem - 32px);
+  width: calc(100% - 16px);
 
   font-size: 1.3rem;
   line-height: 2.4rem;
@@ -343,14 +341,6 @@ html[dir="rtl"] .rename-container > .input-group {
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
-}
-
-.room-list > .room-entry > input {
-  display: inline-block;
-  vertical-align: middle;
-  /* See .room-entry-context-item for the margin/size reductions. */
-  width: calc(100% - 1rem - 16px);
-  font-size: 1.3rem;
 }
 
 .room-list > .room-entry.room-active:not(.room-opened) > h2 {
@@ -457,18 +447,6 @@ html[dir="rtl"] .room-entry-context-actions > .dropdown-menu {
   z-index: 1;
 }
 
-/* Keep ".room-list > .room-entry > h2" in sync with these. */
-.room-entry-context-item {
-  display: inline-block;
-  margin-inline-end: 1rem;
-  vertical-align: middle;
-}
-
-.room-entry-context-item > img,
-.room-entry-context-item > a > img {
-  width: 16px;
-}
-
 .button-close {
   background-color: transparent;
   background-image: url(../../shared/img/icons-10x10.svg#close);
@@ -484,6 +462,18 @@ html[dir="rtl"] .room-entry-context-actions > .dropdown-menu {
 .button-close:hover:active {
   background-color: transparent;
   border: none;
+}
+
+/* Room name edition */
+.edit-room-name-wrapper {
+  width: 100%;
+  display: flex;
+}
+
+.edit-room-name-wrapper .edit-room-name-input {
+  flex-grow: 2;
+  vertical-align: middle;
+  font-size: 1.3rem;
 }
 
 /* Spinner */
